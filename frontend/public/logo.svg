@@ -1,0 +1,23 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hlShieldGrad" x1="10" y1="10" x2="110" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#121826" />
+      <stop offset="100%" stop-color="#080C14" />
+    </linearGradient>
+    <linearGradient id="hlCircuitGrad" x1="20" y1="20" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00D8FF" />
+      <stop offset="100%" stop-color="#00F0A8" />
+    </linearGradient>
+  </defs>
+  <path d="M60 8 L104 28 V68 C104 92 60 112 60 112 C60 112 16 92 16 68 V28 L60 8 Z" fill="url(#hlShieldGrad)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2" />
+  <path d="M60 16 L96 33 V65 C96 85 60 102 60 102 C60 102 24 85 24 65 V33 L60 16 Z" stroke="url(#hlCircuitGrad)" stroke-width="1.8" stroke-opacity="0.75" />
+  <path d="M40 38 V82" stroke="url(#hlCircuitGrad)" stroke-width="6" stroke-linecap="round" />
+  <path d="M80 38 V82" stroke="url(#hlCircuitGrad)" stroke-width="6" stroke-linecap="round" />
+  <path d="M40 60 H80" stroke="url(#hlCircuitGrad)" stroke-width="5.5" stroke-linecap="round" />
+  <circle cx="60" cy="60" r="4.5" fill="#0A0E17" stroke="#00D8FF" stroke-width="2.5" />
+  <circle cx="60" cy="60" r="2" fill="#00F0A8" />
+  <circle cx="40" cy="38" r="3" fill="#00D8FF" />
+  <circle cx="40" cy="82" r="3" fill="#00F0A8" />
+  <circle cx="80" cy="38" r="3" fill="#00D8FF" />
+  <circle cx="80" cy="82" r="3" fill="#00F0A8" />
+</svg>

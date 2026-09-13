@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.gltest_cache/
+artifacts/
+.cache/
+
+# Secrets and local environments
+.env
+.env*.local
+*.pem
+*.key
+
+# Node / Next.js / Frontend
+node_modules/
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+.vercel/
+*.log
+
