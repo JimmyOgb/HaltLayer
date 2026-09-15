@@ -1,7 +1,7 @@
-SECURITY ADVISORY — HALTLAYER EMERGENCY CIRCUIT BREAKER
+SECURITY ADVISORY — HALTLAYER DEFENSE TELEMETRY
 Target Protocol: 0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B
 Protocol Name: DemoVault
-Threat Classification: Critical Reentrancy & Unauthorized Drain Exploit
+Threat Classification: High-Frequency Anomalous Reserve Extraction
 Evidence Quality: Strong
 Recommended Action: HALT
-Forensic Report: An unauthorized exploit drain has targeted DemoVault reserves at 0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B. Exploitation pattern matches critical flash-loan reentrancy theft. Immediate emergency circuit breaker halt required to protect remaining assets.
+Forensic Report: A security verification test identified unauthorized recursive withdrawal anomalies on DemoVault reserves at 0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B. GenLayer consensus-driven circuit breaker intervention requested to preserve protocol solvency.

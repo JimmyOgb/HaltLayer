@@ -9,6 +9,7 @@ import { IncidentReportModal } from "./IncidentReportModal";
 import { IncidentDetailModal } from "./IncidentDetailModal";
 import { AppealModal } from "./AppealModal";
 import { LiveVaultControls } from "./LiveVaultControls";
+import { WalletSafetyPanel } from "./WalletSafetyPanel";
 import { Incident } from "../../lib/contracts/types";
 import { AlertCircle, ShieldAlert, Cpu, CheckCircle2, Server } from "lucide-react";
 
@@ -75,6 +76,9 @@ export const SecurityConsole: React.FC = () => {
           }}
         />
       )}
+
+      {/* Wallet Safety & Network Transparency Panel */}
+      <WalletSafetyPanel />
 
       {/* Protocol Status Card & Security Metrics */}
       <ProtocolStatusCard

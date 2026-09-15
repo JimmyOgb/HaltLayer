@@ -21,8 +21,11 @@ interface ProtocolContextValue {
   rpcUrl: string;
   networkName: string;
   walletAddress: string | null;
+  chainId: string | null;
+  isCorrectChain: boolean;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
+  switchToGenLayerNetwork: () => Promise<void>;
   setContractAddresses: (haltLayer: string, demoVault: string) => void;
   setNetwork: (networkName: string, rpcUrl: string) => void;
   refreshState: () => Promise<void>;
@@ -83,27 +86,139 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [rpcClient, demoVaultAddress]
   );
 
+  const [chainId, setChainId] = useState<string | null>(null);
+
+  // GenLayer StudioNet Chain Specifications
+  const GENLAYER_STUDIONET_CHAIN_ID_HEX = "0xf22f"; // 61999
+  const GENLAYER_STUDIONET_CHAIN_ID_DEC = 61999;
+
+  const isChainMatch = (cId: string | null): boolean => {
+    if (!cId) return false;
+    const clean = cId.toLowerCase().trim();
+    if (clean === GENLAYER_STUDIONET_CHAIN_ID_HEX) return true;
+    try {
+      if (clean.startsWith("0x")) {
+        return parseInt(clean, 16) === GENLAYER_STUDIONET_CHAIN_ID_DEC;
+      }
+      return Number(clean) === GENLAYER_STUDIONET_CHAIN_ID_DEC;
+    } catch {
+      return false;
+    }
+  };
+
+  const isCorrectChain = isChainMatch(chainId);
+
+  // Listen to provider chain & account changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && (window as any).ethereum) {
+      const ethereum = (window as any).ethereum;
+
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (accounts && accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+        } else {
+          setWalletAddress(null);
+        }
+      };
+
+      const handleChainChanged = (newChainId: string) => {
+        setChainId(newChainId);
+      };
+
+      try {
+        ethereum.on?.("accountsChanged", handleAccountsChanged);
+        ethereum.on?.("chainChanged", handleChainChanged);
+
+        // Fetch current chain silently if provider exists
+        ethereum
+          .request?.({ method: "eth_chainId" })
+          .then((cId: string) => {
+            if (cId) setChainId(cId);
+          })
+          .catch(() => {});
+      } catch (e) {
+        console.warn("Ethereum event listener initialization error:", e);
+      }
+
+      return () => {
+        try {
+          ethereum.removeListener?.("accountsChanged", handleAccountsChanged);
+          ethereum.removeListener?.("chainChanged", handleChainChanged);
+        } catch {
+          // ignore cleanup error
+        }
+      };
+    }
+  }, []);
+
   // --- Wallet Management ---
   const connectWallet = async () => {
     if (typeof window !== "undefined" && (window as any).ethereum) {
+      const ethereum = (window as any).ethereum;
       try {
-        const accounts = await (window as any).ethereum.request({ method: "eth_requestAccounts" });
-        if (accounts && accounts.length > 0) {
-          setWalletAddress(accounts[0]);
-          return;
-        } else {
+        // Step 1: Request account access
+        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+        if (!accounts || accounts.length === 0) {
           throw new Error("No accounts found in wallet");
         }
+        setWalletAddress(accounts[0]);
+
+        // Step 2: Verify connected chain
+        const currentChain = await ethereum.request({ method: "eth_chainId" });
+        setChainId(currentChain);
       } catch (err: any) {
         throw new Error(err?.message || "Wallet connection rejected by user");
       }
     } else {
-      throw new Error("No Web3 wallet extension found (e.g. MetaMask). Please install a wallet to sign transactions directly.");
+      throw new Error(
+        "No Web3 wallet extension found (e.g. MetaMask). Read-only mode remains fully functional."
+      );
     }
   };
 
   const disconnectWallet = () => {
     setWalletAddress(null);
+  };
+
+  const switchToGenLayerNetwork = async () => {
+    if (typeof window !== "undefined" && (window as any).ethereum) {
+      const ethereum = (window as any).ethereum;
+      try {
+        await ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: GENLAYER_STUDIONET_CHAIN_ID_HEX }],
+        });
+        setChainId(GENLAYER_STUDIONET_CHAIN_ID_HEX);
+      } catch (switchError: any) {
+        // Error code 4902 means the chain has not been added yet
+        if (switchError.code === 4902 || switchError?.data?.originalError?.code === 4902) {
+          try {
+            await ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: GENLAYER_STUDIONET_CHAIN_ID_HEX,
+                  chainName: "GenLayer StudioNet",
+                  nativeCurrency: {
+                    name: "GEN",
+                    symbol: "GEN",
+                    decimals: 18,
+                  },
+                  rpcUrls: ["https://studio.genlayer.com/api"],
+                },
+              ],
+            });
+            setChainId(GENLAYER_STUDIONET_CHAIN_ID_HEX);
+          } catch (addError: any) {
+            throw new Error(addError?.message || "Failed to add GenLayer StudioNet network");
+          }
+        } else {
+          throw new Error(switchError?.message || "Failed to switch to GenLayer StudioNet");
+        }
+      }
+    } else {
+      throw new Error("No Web3 wallet provider available");
+    }
   };
 
   const setContractAddresses = (haltAddr: string, vaultAddr: string) => {
@@ -394,8 +509,11 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         rpcUrl,
         networkName,
         walletAddress,
+        chainId,
+        isCorrectChain,
         connectWallet,
         disconnectWallet,
+        switchToGenLayerNetwork,
         setContractAddresses,
         setNetwork,
         refreshState,

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { HaltWordmark } from "../brand/HaltWordmark";
 import { useProtocol } from "../../lib/context/ProtocolContext";
 import { NetworkModal } from "./NetworkModal";
+import { WalletSafetyModal } from "./WalletSafetyModal";
 import {
   Globe,
   Wallet,
@@ -12,6 +13,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Settings,
+  ShieldCheck,
+  AlertCircle,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -23,12 +26,16 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
   const {
     state,
     walletAddress,
+    chainId,
+    isCorrectChain,
     connectWallet,
     disconnectWallet,
+    switchToGenLayerNetwork,
     refreshState,
   } = useProtocol();
 
   const [isNetworkModalOpen, setIsNetworkModalOpen] = useState(false);
+  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
 
   const isConnected = state.network.connected;
 
@@ -119,12 +126,25 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
               <Settings className="w-3 h-3 opacity-60 ml-0.5" />
             </button>
 
+            {/* Wrong Network Banner Button if wallet is on incorrect chain */}
+            {walletAddress && !isCorrectChain && (
+              <button
+                onClick={switchToGenLayerNetwork}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-xs font-semibold hover:bg-amber-500/30 transition-colors cursor-pointer animate-pulse"
+                title="Click to switch wallet to GenLayer StudioNet (Chain ID: 61999)"
+              >
+                <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Switch Chain (61999)</span>
+                <span className="sm:hidden">Switch</span>
+              </button>
+            )}
+
             {/* Wallet Connect / Account Control */}
             {walletAddress ? (
               <div className="flex items-center gap-2">
                 <button
                   onClick={disconnectWallet}
-                  title="Click to disconnect wallet"
+                  title="Connected to GenLayer StudioNet. Click to disconnect."
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-cyan-950/20 text-cyan-300 font-mono text-xs hover:border-cyan-500/50 transition-colors cursor-pointer"
                 >
                   <Wallet className="w-3.5 h-3.5 text-cyan-400" />
@@ -135,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
               </div>
             ) : (
               <button
-                onClick={connectWallet}
+                onClick={() => setIsSafetyModalOpen(true)}
                 className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-white font-mono text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
               >
                 <Wallet className="w-3.5 h-3.5 text-gray-300" />
@@ -178,6 +198,13 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
       <NetworkModal
         isOpen={isNetworkModalOpen}
         onClose={() => setIsNetworkModalOpen(false)}
+      />
+
+      {/* Wallet Safety & Connection Explanatory Modal */}
+      <WalletSafetyModal
+        isOpen={isSafetyModalOpen}
+        onClose={() => setIsSafetyModalOpen(false)}
+        onConnect={connectWallet}
       />
     </>
   );

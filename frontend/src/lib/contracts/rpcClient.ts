@@ -121,7 +121,6 @@ export class GenLayerRpcClient {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        endpoint: this.endpoint,
         targetAddress,
         functionName,
         args,

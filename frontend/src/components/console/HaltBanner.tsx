@@ -52,7 +52,7 @@ export const HaltBanner: React.FC<HaltBannerProps> = ({
 
             <p className="text-xs sm:text-sm text-gray-300 max-w-2xl leading-relaxed">
               Autonomous protection triggered by GenLayer validator consensus. All asset withdrawals,
-              deposits, and vulnerable interactions are immediately frozen to prevent reserve drainage.
+              deposits, and vulnerable interactions are immediately frozen to safeguard protocol reserves.
             </p>
 
             {incident && (

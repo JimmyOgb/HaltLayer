@@ -364,7 +364,52 @@ vercel --prod --yes
 
 ---
 
-## 14. Security Considerations
+## 14. Wallet Safety & Non-Custodial Transparency
+
+HaltLayer is designed with a security-first, non-custodial architecture that prioritizes user safety and transparency:
+
+### 1. Read-Only By Default
+The entire HaltLayer application functions in **read-only mode** without connecting a Web3 wallet. Users and judges can freely inspect:
+* Active contract states and reserve totals
+* Incident ledger and consensus adjudication history
+* Deployed contract addresses and verification records
+* Live network connection and StudioNet telemetry
+
+### 2. Wallet Connection Purpose
+Connecting a browser wallet (e.g., MetaMask) is **strictly optional** and only required for user-authorized write operations:
+* Submitting incident evidence reports (`submit_incident`)
+* Triggering decentralized validator adjudication (`adjudicate_incident`)
+* Submitting mitigation appeals (`appeal_incident` / `resolve_appeal`)
+* Testing vault defense mechanisms (`deposit`, `withdraw`, `pause`, `resume`)
+
+### 3. Pre-Signing Transaction Confirmation (Rule 13 Compliance)
+Every state-modifying action requires explicit confirmation through a transparent review modal that displays:
+* **Target Contract Address**: Allowlisted contract destination
+* **Target Contract Name**: Human-readable protocol name
+* **Network & Chain ID**: GenLayer StudioNet (Chain ID: `61999`)
+* **Method Name**: Exact contract entry point being invoked
+* **Human-Readable Purpose**: Clear explanation of the intended operation
+* **Transaction Value**: `0 GEN` (gasless / free on StudioNet)
+* **Protocol State Impact**: Exact on-chain state transition effected
+
+### 4. Zero Token Approvals & Non-Custodial Hygiene
+* **No Token Approvals**: HaltLayer never requests `approve()`, `setApprovalForAll()`, `permit()`, or `permit2` signatures.
+* **No Fund Transfers**: The dApp does not request or execute transfers of user ETH, GEN, or other digital assets.
+* **No Private Keys**: Private keys, mnemonics, or seed phrases are never requested, stored, or transmitted.
+* **Narrow Allowlisted Dispatcher**: The `/api/tx` endpoint only relays typed, allowlisted actions to verified contract targets.
+
+### 5. Verified Deployment Addresses
+* **HaltLayer Contract**: `0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`
+* **DemoVault Contract**: `0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B`
+* **Network**: GenLayer StudioNet (`https://studio.genlayer.com/api`, Chain ID `61999` / `0xf22f`)
+
+### 6. Hackathon & Demo Limitations
+* HaltLayer is an experimental prototype developed for the GenLayer Agent Tank Hackathon.
+* Always connect using a dedicated test/burner wallet on GenLayer StudioNet. Never connect mainnet accounts holding real funds.
+
+---
+
+## 15. Security Considerations
 
 1. **Strict Authorization**: Only the registered `circuit_breaker` contract address can trigger emergency pauses on protected protocols.
 2. **Quality Threshold Enforcement**: The protocol owner sets `min_evidence_quality`. Unsubstantiated alerts cannot pause protocols.
@@ -374,14 +419,14 @@ vercel --prod --yes
 
 ---
 
-## 15. Known Limitations
+## 16. Known Limitations
 
 * **Controlled Fixture Evaluation**: Positive-control testing relies on controlled forensic evidence because clean testnet contracts lack active in-the-wild adversaries.
 * **StudioNet Environment**: StudioNet is a testnet environment; validator performance and LLM inference latencies may vary based on testnet load.
 
 ---
 
-## 16. Roadmap
+## 17. Roadmap
 
 * [ ] **Automated On-Chain Forensics**: Real-time automated transaction trace parsing natively in GenVM.
 * [ ] **Multi-Protocol Router**: Centralized security router supporting tiered pause capabilities (e.g. rate-limiting, partial liquidation freeze).
@@ -389,7 +434,7 @@ vercel --prod --yes
 
 ---
 
-## 17. Contributing
+## 18. Contributing
 
 1. Fork the repository.
 2. Create a feature branch (`git checkout -b feature/defense-enhancement`).
@@ -399,13 +444,13 @@ vercel --prod --yes
 
 ---
 
-## 18. License
+## 19. License
 
 No formal license was pre-existing in this repository. This software is provided as an open-source prototype for the GenLayer Agent Tank Hackathon. For commercial reuse or formal deployment licensing, please contact the repository owner.
 
 ---
 
-## 19. Hackathon Track
+## 20. Hackathon Track
 
 * **Event**: GenLayer Agent Tank Hackathon (2026)
 * **Track**: Autonomous Protocols
