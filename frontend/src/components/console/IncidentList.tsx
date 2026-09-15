@@ -48,11 +48,11 @@ export const IncidentList: React.FC<IncidentListProps> = ({
     setPendingTx({
       targetAddress: haltLayerAddress,
       contractName: "HaltLayer (Autonomous Circuit Breaker)",
-      networkName: "GenLayer StudioNet",
-      chainId: 61999,
+      networkName: "GenLayer Studio Next",
+      chainId: 61997,
       methodName: "adjudicate_incident",
       purpose: `Trigger multi-validator consensus on GenLayer to evaluate evidence for incident ${id}.`,
-      value: "0 GEN (Gasless on StudioNet)",
+      value: "Fee-funded by Studio Next policy (0 user cost)",
       changesState: true,
       stateEffect: `Executes nondeterministic analysis and updates incident ${id} to either HALT_ACCEPTED or REJECTED.`,
       onConfirm: async () => {

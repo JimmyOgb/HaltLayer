@@ -1,6 +1,10 @@
-# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
+# v0.3.0
+# { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
 
+import genlayer as gl
 from genlayer import *
+from genlayer.storage import TreeMap
+from genlayer.types import Address, u256
 
 
 def _as_address(addr) -> Address:
@@ -9,7 +13,7 @@ def _as_address(addr) -> Address:
     return Address(str(addr))
 
 
-class DemoVault(gl.Contract):
+class DemoVault(gl.contract.Contract):
     """
     DemoVault: Protected target protocol for HaltLayer.
     Exposes deposit, withdraw, pause, resume, and emergency-safe controls.
@@ -33,9 +37,9 @@ class DemoVault(gl.Contract):
     @gl.public.write
     def deposit(self, amount: u256) -> None:
         """Deposit funds into the vault. Blocked if vault is paused or in safe mode."""
-        if self.paused:
+        if self.is_paused():
             raise gl.vm.UserError("Vault is paused: deposits disabled")
-        if self.safe_mode:
+        if self.is_safe_mode():
             raise gl.vm.UserError("Vault in safe mode: deposits disabled")
         if int(amount) <= 0:
             raise gl.vm.UserError("Deposit amount must be positive")
@@ -48,9 +52,9 @@ class DemoVault(gl.Contract):
     @gl.public.write
     def withdraw(self, amount: u256) -> None:
         """Withdraw funds from the vault. Blocked if vault is paused or in safe mode."""
-        if self.paused:
+        if self.is_paused():
             raise gl.vm.UserError("Vault is paused: withdrawals disabled")
-        if self.safe_mode:
+        if self.is_safe_mode():
             raise gl.vm.UserError("Vault in safe mode: withdrawals restricted")
         if int(amount) <= 0:
             raise gl.vm.UserError("Withdrawal amount must be positive")
@@ -103,11 +107,29 @@ class DemoVault(gl.Contract):
 
     @gl.public.view
     def is_paused(self) -> bool:
-        return self.paused
+        if self.paused:
+            return True
+        if self.circuit_breaker.as_hex != "0x0000000000000000000000000000000000000000":
+            try:
+                cb = gl.contract.get_at(self.circuit_breaker)
+                if cb.view().get_protection_status(gl.message.contract_address.as_hex) == "HALTED":
+                    return True
+            except Exception:
+                pass
+        return False
 
     @gl.public.view
     def is_safe_mode(self) -> bool:
-        return self.safe_mode
+        if self.safe_mode:
+            return True
+        if self.circuit_breaker.as_hex != "0x0000000000000000000000000000000000000000":
+            try:
+                cb = gl.contract.get_at(self.circuit_breaker)
+                if cb.view().get_protection_status(gl.message.contract_address.as_hex) == "SAFE_MODE":
+                    return True
+            except Exception:
+                pass
+        return False
 
     @gl.public.view
     def get_balance(self, account: str) -> int:

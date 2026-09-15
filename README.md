@@ -2,7 +2,7 @@
 
 ### Autonomous Emergency Circuit-Breaker for Agentic Protocols
 
-[![GenLayer StudioNet](https://img.shields.io/badge/GenLayer-StudioNet_61999-00F0A8?style=flat-square)](https://studio.genlayer.com)
+[![GenLayer Studio Next](https://img.shields.io/badge/GenLayer-Studio_Next_61997-00F0A8?style=flat-square)](https://studio-next.genlayer.com)
 [![GenVM Python](https://img.shields.io/badge/GenVM-Python_3.12-00D8FF?style=flat-square)](https://docs.genlayer.com)
 [![Direct Tests](https://img.shields.io/badge/Tests-17%2F17_Passing-brightgreen?style=flat-square)](tests/direct/)
 [![GenVM Lint](https://img.shields.io/badge/GenVM--Lint-Passed-success?style=flat-square)](contracts/)
@@ -11,7 +11,8 @@
 
 **Live Demo Application:** [https://haltlayer.vercel.app](https://haltlayer.vercel.app)  
 **Target GitHub Repository:** [https://github.com/JimmyOgb/HaltLayer](https://github.com/JimmyOgb/HaltLayer)  
-**GenLayer StudioNet Explorer:** [https://genlayer-explorer.vercel.app](https://genlayer-explorer.vercel.app)
+**GenLayer Studio Next Explorer:** [https://explorer-studio-dev.genlayer.com/](https://explorer-studio-dev.genlayer.com/)  
+**StudioNet Explorer (Historical Fallback):** [https://genlayer-explorer.vercel.app](https://genlayer-explorer.vercel.app)
 
 ---
 
@@ -131,42 +132,58 @@ HaltLayer does **NOT** blindly halt protocols on every submission. It applies st
 
 ---
 
-## 6. Live StudioNet Verification & Proof
+## 6. Live Deployments & On-Chain Verification
 
-HaltLayer and DemoVault are deployed and verified on **GenLayer StudioNet** (`Chain ID: 61999`):
+### 6.1 Active Deployment: GenLayer Studio Next (`Chain ID: 61997` / `0xf22d`)
 
-* **DemoVault Intelligent Contract**: [`0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B`](https://genlayer-explorer.vercel.app)
-* **HaltLayer Intelligent Contract**: [`0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`](https://genlayer-explorer.vercel.app)
-* **Deployer / Admin Address**: `0xE4220c4b71877bb94EB173f467ef5c5557017085`
+HaltLayer and DemoVault are actively deployed and verified on **GenLayer Studio Next** (GenVM v0.3.0):
 
-### Circuit-Breaker Authorization Read
-Direct read from DemoVault confirms HaltLayer is authorized:
-```powershell
-genlayer call 0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B get_circuit_breaker
-# Returns: 0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23
-```
+* **Network**: Studio Next
+* **Chain ID**: `61997` (`0xf22d`)
+* **RPC Endpoint**: `https://studio-next.genlayer.com/api`
+* **Block Explorer**: [https://explorer-studio-dev.genlayer.com/](https://explorer-studio-dev.genlayer.com/)
+* **HaltLayer Intelligent Contract**: [`0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`](https://explorer-studio-dev.genlayer.com/address/0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45)
+  - Deployment Tx: `0x241fab1a52f72fbaaaad6adc961ad8e6348b4479ff22bff7eeb270581dde92cd`
+* **DemoVault Intelligent Contract**: [`0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`](https://explorer-studio-dev.genlayer.com/address/0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9)
+  - Deployment Tx: `0xc4ebb28dfdacaf24a295ea115a989c72b3aaf32f3ee92c88d3b1ef3666786c81`
+* **Deployer / Admin Address**: `0x140134f0e74b7F243E94a4c4BFE6910A2B11c1d0`
 
-### Controlled StudioNet Live Test Runs
+#### Controlled Studio Next Live Test Runs
 
-#### Negative Control — Incident `INC-3` (`[INC-LIVE-NEGATIVE-1]`)
-* **Evidence**: Unverified forum rumor with no transaction hashes.
-* **Submission Tx**: `0xf7221236a36627e71ddc46e3ac188d6146d09c766d514818ebb427be047ba28e`
-* **Adjudication Tx**: `0x8dad815647f8d6f97570ce04127f336452a82395dbfc695410464728f53ba1e7`
-* **Consensus Outcome**: `ACCEPTED` (`MAJORITY_AGREE`, 1 round)
-* **Final Incident State**: `REJECTED` (`evidence_quality: weak`, `recommended_action: NO_ACTION`)
-* **DemoVault Pause Read**: **`false`** (Protocol remained safely unpaused).
+##### Negative Control — Incident `INC-1` (`[INC-LIVE-NEGATIVE-NEXT]`)
+* **Evidence**: Unverified social post without trace or transaction hashes.
+* **Submission Tx**: `0x06005741adcbab93ea0ce55f2a8caf2a0381a2f6767ced77a4b92834bd5efb38`
+* **Adjudication Tx**: `0x78499f7cb92e1cbc17f224430148b1e4eb9bf2c143c7c454b301ef268800d95d`
+* **Consensus Outcome**: `ACCEPTED` (GenLayer validator consensus confirmed)
+* **Final Incident State**: `REJECTED` (`threat_severity: none`, `evidence_quality: weak`, `recommended_action: NO_ACTION`)
+* **Protection Status**: **`ACTIVE`**
+* **DemoVault Pause Read**: **`false`** (Protocol remained safely unpaused; false-positive griefing rejected).
 
-#### Positive Control — Incident `INC-4` (`[INC-LIVE-POSITIVE-1]`)
-* **Evidence**: Structured forensic audit citing recursive reentrancy exploit on DemoVault reserves.
-* **Submission Tx**: `0x6ed474a169caa6946a48385bdfffc8d316fe00278ddc1cab7ceb6a152f91b872`
-* **Adjudication Tx**: `0xb299fb3228bc83da8af001113f2be5e2b56b60060bf3a7114629cf8f8831cd2c`
-* **Consensus Outcome**: `ACCEPTED` (`MAJORITY_AGREE`, 1 round)
-* **Triggered Internal Message**: `0x0768753dcf7d74a0dfe3e966214b9789613e2cd28e988df7f4dd8a753d1bcfa1` (`method: pause`)
+##### Positive Control — Incident `INC-2` (`[INC-LIVE-POSITIVE-NEXT]`)
+* **Evidence**: Structured forensic audit telemetry citing recursive reentrancy exploit on DemoVault reserves.
+* **Submission Tx**: `0x3f4e88597911a25f6476f82d036c1e8278e0f7f15c930bcffb90f8b3ae5247eb`
+* **Adjudication Tx**: `0xe8cb7384df100d194ee40d12686e5d03b56ba302b2c7bdcbcfacbb67f9d6be2c`
+* **Consensus Outcome**: `ACCEPTED` (GenLayer validator consensus confirmed)
 * **Final Incident State**: `HALT_ACCEPTED` (`threat_severity: critical`, `evidence_quality: strong`, `recommended_action: HALT`)
-* **HaltLayer Protection Status**: **`HALTED`**
-* **DemoVault Pause Read**: **`true`** (Emergency circuit breaker tripped on-chain).
+* **Protection Status**: **`HALTED`**
+* **DemoVault Pause Read**: **`true`** (Emergency circuit breaker tripped on-chain!).
 
-> **Important Disclosure**: `INC-4` was executed as a controlled positive-control forensic scenario to rigorously prove the on-chain halt path on StudioNet. It is not an active adversarial exploit in the wild.
+> **Important Disclosure**: `INC-2` was executed as a controlled positive-control forensic scenario to rigorously prove the on-chain halt path on Studio Next. It is not an active adversarial exploit in the wild.
+
+---
+
+### 6.2 Historical Fallback: GenLayer StudioNet (`Chain ID: 61999` / `0xf22f`)
+
+Preserved as a historical fallback per hackathon migration rules:
+
+* **Network**: StudioNet (Legacy Fallback)
+* **Chain ID**: `61999` (`0xf22f`)
+* **RPC Endpoint**: `https://studio.genlayer.com/api`
+* **Block Explorer**: [https://genlayer-explorer.vercel.app](https://genlayer-explorer.vercel.app)
+* **HaltLayer Intelligent Contract**: `0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`
+* **DemoVault Intelligent Contract**: `0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B`
+* **Deployer / Admin Address**: `0xE4220c4b71877bb94EB173f467ef5c5557017085`
+* **Verified Incidents**: `INC-3` (Negative control, rejected) and `INC-4` (Positive control, halt accepted)
 
 ---
 
@@ -181,7 +198,7 @@ genlayer call 0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B get_circuit_breaker
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │               HaltLayer Intelligent Contract                │
-│                 0xB363...1A23 (StudioNet)                   │
+│             0x6ec1...BB45 (Studio Next, 61997)              │
 ├─────────────────────────────────────────────────────────────┤
 │ 1. Leader Execution (gl.vm.run_nondet)                      │
 │    - Fetches web telemetry (gl.nondet.web.get)              │
@@ -190,13 +207,13 @@ genlayer call 0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B get_circuit_breaker
 │    - Evaluates Equivalence Principle invariants             │
 │    - Checks policy boundaries & evidence floor              │
 │ 3. Deterministic State Transition                           │
-│    - Emits cross-contract message if HALT_ACCEPTED          │
+│    - Cross-contract protection check & pause enforcement    │
 └──────────────────────────────┬──────────────────────────────┘
-                               │ target_contract.pause()
+                               │ pause() / view check
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                 DemoVault Protected Protocol                │
-│                 0x76a3...3d1B (StudioNet)                   │
+│             0x30B4...d0F9 (Studio Next, 61997)              │
 ├─────────────────────────────────────────────────────────────┤
 │ - is_paused() == true                                       │
 │ - Unauthorized withdrawals immediately REVERT               │
@@ -341,8 +358,11 @@ cd ..
 
 ## 13. Deployment Guide
 
-### Deploying Contracts to StudioNet
+### Deploying Contracts to Studio Next
 ```bash
+# Using GenLayer CLI or Studio Next Web IDE
+# RPC: https://studio-next.genlayer.com/api (Chain ID: 61997)
+
 # 1. Deploy DemoVault
 genlayer deploy contracts/demo_vault.py
 
@@ -359,6 +379,7 @@ genlayer write <HALT_LAYER_ADDRESS> register_protocol --args <DEMO_VAULT_ADDRESS
 ### Deploying Frontend to Vercel
 ```bash
 cd frontend
+npm run build
 vercel --prod --yes
 ```
 
@@ -373,7 +394,7 @@ The entire HaltLayer application functions in **read-only mode** without connect
 * Active contract states and reserve totals
 * Incident ledger and consensus adjudication history
 * Deployed contract addresses and verification records
-* Live network connection and StudioNet telemetry
+* Live network connection and Studio Next telemetry
 
 ### 2. Wallet Connection Purpose
 Connecting a browser wallet (e.g., MetaMask) is **strictly optional** and only required for user-authorized write operations:
@@ -386,10 +407,10 @@ Connecting a browser wallet (e.g., MetaMask) is **strictly optional** and only r
 Every state-modifying action requires explicit confirmation through a transparent review modal that displays:
 * **Target Contract Address**: Allowlisted contract destination
 * **Target Contract Name**: Human-readable protocol name
-* **Network & Chain ID**: GenLayer StudioNet (Chain ID: `61999`)
+* **Network & Chain ID**: GenLayer Studio Next (Chain ID: `61997` / `0xf22d`)
 * **Method Name**: Exact contract entry point being invoked
 * **Human-Readable Purpose**: Clear explanation of the intended operation
-* **Transaction Value**: `0 GEN` (gasless / free on StudioNet)
+* **Transaction Fee Policy**: Platform fee distribution policy (zero user token deduction)
 * **Protocol State Impact**: Exact on-chain state transition effected
 
 ### 4. Zero Token Approvals & Non-Custodial Hygiene
@@ -399,13 +420,20 @@ Every state-modifying action requires explicit confirmation through a transparen
 * **Narrow Allowlisted Dispatcher**: The `/api/tx` endpoint only relays typed, allowlisted actions to verified contract targets.
 
 ### 5. Verified Deployment Addresses
-* **HaltLayer Contract**: `0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`
-* **DemoVault Contract**: `0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B`
-* **Network**: GenLayer StudioNet (`https://studio.genlayer.com/api`, Chain ID `61999` / `0xf22f`)
+* **Studio Next (Active Hackathon Target)**:
+  * Network: Studio Next (`https://studio-next.genlayer.com/api`, Chain ID `61997` / `0xf22d`)
+  * HaltLayer Contract: `0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`
+  * DemoVault Contract: `0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`
+  * Explorer: `https://explorer-studio-dev.genlayer.com/`
+* **StudioNet (Historical Fallback)**:
+  * Network: StudioNet (`https://studio.genlayer.com/api`, Chain ID `61999` / `0xf22f`)
+  * HaltLayer Contract: `0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`
+  * DemoVault Contract: `0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B`
+  * Explorer: `https://genlayer-explorer.vercel.app`
 
 ### 6. Hackathon & Demo Limitations
 * HaltLayer is an experimental prototype developed for the GenLayer Agent Tank Hackathon.
-* Always connect using a dedicated test/burner wallet on GenLayer StudioNet. Never connect mainnet accounts holding real funds.
+* Always connect using a dedicated test/burner wallet on GenLayer Studio Next. Never connect mainnet accounts holding real funds.
 
 ---
 

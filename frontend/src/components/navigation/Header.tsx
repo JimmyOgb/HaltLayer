@@ -131,10 +131,10 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onSelectTab }) => {
               <button
                 onClick={switchToGenLayerNetwork}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-xs font-semibold hover:bg-amber-500/30 transition-colors cursor-pointer animate-pulse"
-                title="Click to switch wallet to GenLayer StudioNet (Chain ID: 61999)"
+                title="Click to switch wallet to GenLayer Studio Next (Chain ID: 61997)"
               >
                 <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Switch Chain (61999)</span>
+                <span className="hidden sm:inline">Switch Chain (61997)</span>
                 <span className="sm:hidden">Switch</span>
               </button>
             )}

@@ -42,16 +42,16 @@ const ProtocolContext = createContext<ProtocolContextValue | undefined>(undefine
 
 export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [rpcUrl, setRpcUrl] = useState<string>(
-    process.env.NEXT_PUBLIC_GENLAYER_RPC_URL || "https://studio.genlayer.com/api"
+    process.env.NEXT_PUBLIC_GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api"
   );
   const [networkName, setNetworkName] = useState<string>(
-    process.env.NEXT_PUBLIC_NETWORK_NAME || "studionet"
+    process.env.NEXT_PUBLIC_NETWORK_NAME || "studio_next"
   );
   const [haltLayerAddress, setHaltLayerAddress] = useState<string>(
-    process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS || "0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23"
+    process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS || "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45"
   );
   const [demoVaultAddress, setDemoVaultAddress] = useState<string>(
-    process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS || "0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B"
+    process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS || "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9"
   );
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<TransactionStatus[]>([]);
@@ -88,19 +88,23 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [chainId, setChainId] = useState<string | null>(null);
 
-  // GenLayer StudioNet Chain Specifications
+  // Studio Next (Primary) & StudioNet (Fallback) Chain Specifications
+  const GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX = "0xf22d"; // 61997
+  const GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC = 61997;
   const GENLAYER_STUDIONET_CHAIN_ID_HEX = "0xf22f"; // 61999
   const GENLAYER_STUDIONET_CHAIN_ID_DEC = 61999;
 
   const isChainMatch = (cId: string | null): boolean => {
     if (!cId) return false;
     const clean = cId.toLowerCase().trim();
-    if (clean === GENLAYER_STUDIONET_CHAIN_ID_HEX) return true;
+    if (clean === GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX || clean === GENLAYER_STUDIONET_CHAIN_ID_HEX) return true;
     try {
       if (clean.startsWith("0x")) {
-        return parseInt(clean, 16) === GENLAYER_STUDIONET_CHAIN_ID_DEC;
+        const parsed = parseInt(clean, 16);
+        return parsed === GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC || parsed === GENLAYER_STUDIONET_CHAIN_ID_DEC;
       }
-      return Number(clean) === GENLAYER_STUDIONET_CHAIN_ID_DEC;
+      const num = Number(clean);
+      return num === GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC || num === GENLAYER_STUDIONET_CHAIN_ID_DEC;
     } catch {
       return false;
     }
@@ -186,9 +190,9 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         await ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: GENLAYER_STUDIONET_CHAIN_ID_HEX }],
+          params: [{ chainId: GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX }],
         });
-        setChainId(GENLAYER_STUDIONET_CHAIN_ID_HEX);
+        setChainId(GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX);
       } catch (switchError: any) {
         // Error code 4902 means the chain has not been added yet
         if (switchError.code === 4902 || switchError?.data?.originalError?.code === 4902) {
@@ -197,23 +201,24 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId: GENLAYER_STUDIONET_CHAIN_ID_HEX,
-                  chainName: "GenLayer StudioNet",
+                  chainId: GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX,
+                  chainName: "GenLayer Studio Next",
                   nativeCurrency: {
-                    name: "GEN",
+                    name: "GEN Token",
                     symbol: "GEN",
                     decimals: 18,
                   },
-                  rpcUrls: ["https://studio.genlayer.com/api"],
+                  rpcUrls: ["https://studio-next.genlayer.com/api"],
+                  blockExplorerUrls: ["https://explorer-studio-dev.genlayer.com/"],
                 },
               ],
             });
-            setChainId(GENLAYER_STUDIONET_CHAIN_ID_HEX);
+            setChainId(GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX);
           } catch (addError: any) {
-            throw new Error(addError?.message || "Failed to add GenLayer StudioNet network");
+            throw new Error(addError?.message || "Failed to add GenLayer Studio Next network");
           }
         } else {
-          throw new Error(switchError?.message || "Failed to switch to GenLayer StudioNet");
+          throw new Error(switchError?.message || "Failed to switch to GenLayer Studio Next");
         }
       }
     } else {

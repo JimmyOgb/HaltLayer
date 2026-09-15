@@ -46,6 +46,14 @@ Point to the appeal resolution:
 
 ---
 
+## Live Studio Next Verification for Judges
+
+Judges can verify live deployments on **Studio Next** (`Chain ID: 61997` / `0xf22d`):
+* **HaltLayer Contract**: [`0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`](https://explorer-studio-dev.genlayer.com/address/0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45)
+* **DemoVault Contract**: [`0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`](https://explorer-studio-dev.genlayer.com/address/0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9)
+* **Live Console**: [https://haltlayer.vercel.app](https://haltlayer.vercel.app)
+* **Historical StudioNet Fallback**: [`0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`](https://genlayer-explorer.vercel.app)
+
 ## Quick Verification Commands for Judges
 
 ```bash

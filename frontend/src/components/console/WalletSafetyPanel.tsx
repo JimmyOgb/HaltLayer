@@ -100,14 +100,14 @@ export const WalletSafetyPanel: React.FC = () => {
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <span>
-              Connected to Chain ID {chainId || "Unknown"} — GenLayer StudioNet (Chain ID: 61999) is required.
+              Connected to Chain ID {chainId || "Unknown"} — GenLayer Studio Next (Chain ID: 61997) is required.
             </span>
           </div>
           <button
             onClick={switchToGenLayerNetwork}
             className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold transition-colors cursor-pointer"
           >
-            Switch to GenLayer StudioNet
+            Switch to GenLayer Studio Next
           </button>
         </div>
       )}
@@ -148,8 +148,8 @@ export const WalletSafetyPanel: React.FC = () => {
         {/* Network & Chain ID */}
         <div className="p-3 rounded-xl border border-white/5 bg-black/40">
           <span className="text-gray-400 text-[10px] uppercase block mb-1">Verified Network</span>
-          <span className="text-white font-bold block">GenLayer StudioNet</span>
-          <span className="text-cyan-400 text-[11px] block mt-0.5">Chain ID: 61999 (0xf22f)</span>
+          <span className="text-white font-bold block">GenLayer Studio Next</span>
+          <span className="text-cyan-400 text-[11px] block mt-0.5">Chain ID: 61997 (0xf22d)</span>
         </div>
 
         {/* HaltLayer Contract */}

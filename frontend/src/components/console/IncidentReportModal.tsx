@@ -51,11 +51,11 @@ export const IncidentReportModal: React.FC<IncidentReportModalProps> = ({
     setPendingTx({
       targetAddress: haltLayerAddress,
       contractName: "HaltLayer (Autonomous Circuit Breaker)",
-      networkName: "GenLayer StudioNet",
-      chainId: 61999,
+      networkName: "GenLayer Studio Next",
+      chainId: 61997,
       methodName: "submit_incident",
       purpose: `Submit incident threat report against ${target.trim().slice(0, 10)}... for GenLayer validator consensus evaluation.`,
-      value: "0 GEN (Gasless on StudioNet)",
+      value: "Fee-funded by Studio Next policy (0 user cost)",
       changesState: true,
       stateEffect: "Appends a new pending incident record into HaltLayer ledger.",
       onConfirm: async () => {

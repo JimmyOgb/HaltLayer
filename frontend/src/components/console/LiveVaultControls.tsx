@@ -48,11 +48,11 @@ export const LiveVaultControls: React.FC<LiveVaultControlsProps> = ({ isOpen, on
     setPendingTx({
       targetAddress: demoVaultAddress,
       contractName: "DemoVault (Lending Reserve)",
-      networkName: "GenLayer StudioNet",
-      chainId: 61999,
+      networkName: "GenLayer Studio Next",
+      chainId: 61997,
       methodName: "deposit",
       purpose: `Inject $${depositAmount.toLocaleString()} simulated liquidity into DemoVault reserves to test state updates.`,
-      value: "0 GEN (Gasless on StudioNet)",
+      value: "Fee-funded by Studio Next policy (0 user cost)",
       changesState: true,
       stateEffect: `Increases DemoVault total staked reserves by $${depositAmount.toLocaleString()} and credits user balance.`,
       onConfirm: async () => {
@@ -75,13 +75,13 @@ export const LiveVaultControls: React.FC<LiveVaultControlsProps> = ({ isOpen, on
     setPendingTx({
       targetAddress: demoVaultAddress,
       contractName: "DemoVault (Lending Reserve)",
-      networkName: "GenLayer StudioNet",
-      chainId: 61999,
+      networkName: "GenLayer Studio Next",
+      chainId: 61997,
       methodName: "withdraw",
       purpose: isPaused
         ? `Attempt withdrawal of $${withdrawAmount.toLocaleString()} to verify that paused circuit breaker blocks transactions on-chain.`
         : `Withdraw $${withdrawAmount.toLocaleString()} from DemoVault active balance.`,
-      value: "0 GEN (Gasless on StudioNet)",
+      value: "Fee-funded by Studio Next policy (0 user cost)",
       changesState: true,
       stateEffect: isPaused
         ? "Transaction will revert on-chain with: 'Vault is paused: withdrawals disabled'."
@@ -106,13 +106,13 @@ export const LiveVaultControls: React.FC<LiveVaultControlsProps> = ({ isOpen, on
     setPendingTx({
       targetAddress: demoVaultAddress,
       contractName: "DemoVault (Lending Reserve)",
-      networkName: "GenLayer StudioNet",
-      chainId: 61999,
+      networkName: "GenLayer Studio Next",
+      chainId: 61997,
       methodName: isPaused ? "resume" : "pause",
       purpose: isPaused
         ? "Resume DemoVault normal operations, unfreezing withdrawals."
         : "Activate manual emergency pause on DemoVault, blocking all withdrawals.",
-      value: "0 GEN (Gasless on StudioNet)",
+      value: "Fee-funded by Studio Next policy (0 user cost)",
       changesState: true,
       stateEffect: isPaused
         ? "Transitions DemoVault is_paused to false (unrestricted withdrawals)."

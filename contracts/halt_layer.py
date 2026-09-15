@@ -1,8 +1,12 @@
-# { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
+# v0.3.0
+# { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
 
 import json
 from dataclasses import dataclass
+import genlayer as gl
 from genlayer import *
+from genlayer.storage import TreeMap, DynArray, allow as allow_storage
+from genlayer.types import Address, u256, u32
 
 
 @allow_storage
@@ -98,7 +102,16 @@ def _as_str(val) -> str:
     return str(val)
 
 
-class HaltLayer(gl.Contract):
+def _get_contract_at(addr: Address):
+    if hasattr(gl, "contract") and hasattr(gl.contract, "get_at"):
+        return gl.contract.get_at(addr)
+    if hasattr(gl, "get_contract_at"):
+        return gl.get_contract_at(addr)
+    raise gl.vm.UserError("No contract proxy method found")
+
+
+
+class HaltLayer(gl.contract.Contract):
     """
     HaltLayer: Autonomous Emergency Circuit-Breaker for Intelligent Contracts.
     Evaluates submitted exploit incidents via GenLayer nondeterministic execution
@@ -367,12 +380,12 @@ class HaltLayer(gl.Contract):
 
             # Cross-contract emergency action to target protocol
             try:
-                target_contract = gl.get_contract_at(target_addr)
+                target_contract = _get_contract_at(target_addr)
                 if action == "HALT":
                     target_contract.emit(on="accepted").pause()
                 else:
                     target_contract.emit(on="accepted").activate_safe_mode()
-            except gl.vm.UserError:
+            except Exception:
                 pass
         else:
             incident.status = "REJECTED"
@@ -442,9 +455,9 @@ class HaltLayer(gl.Contract):
             protocol.protection_status = "ACTIVE"
             # Resume target vault
             try:
-                target_contract = gl.get_contract_at(target_addr)
+                target_contract = _get_contract_at(target_addr)
                 target_contract.emit(on="accepted").resume()
-            except gl.vm.UserError:
+            except Exception:
                 pass
         else:
             incident.status = "FINAL_HALT"

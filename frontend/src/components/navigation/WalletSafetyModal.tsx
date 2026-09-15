@@ -67,7 +67,7 @@ export const WalletSafetyModal: React.FC<WalletSafetyModalProps> = ({
               <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
               <div className="font-sans text-gray-200">
                 <strong className="text-white font-mono block">Verified Target Contracts:</strong>
-                Interactions are strictly restricted to HaltLayer (<code>0xB363...1A23</code>) and DemoVault (<code>0x76a3...3d1B</code>).
+                Interactions are strictly restricted to HaltLayer (<code>0x6ec1...BB45</code>) and DemoVault (<code>0x30B4...d0F9</code>).
               </div>
             </div>
 
@@ -75,7 +75,7 @@ export const WalletSafetyModal: React.FC<WalletSafetyModalProps> = ({
               <Lock className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
               <div className="font-sans text-gray-200">
                 <strong className="text-white font-mono block">Verified Network:</strong>
-                GenLayer StudioNet (Chain ID: <code>61999</code> / <code>0xf22f</code>).
+                GenLayer Studio Next (Chain ID: <code>61997</code> / <code>0xf22d</code>).
               </div>
             </div>
           </div>

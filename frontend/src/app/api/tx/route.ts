@@ -1,21 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { encodeGenCallPayload } from "../../../lib/contracts/codec";
+import {
+  createClient,
+  chains,
+  createAccount,
+  generatePrivateKey,
+} from "genlayer-js";
 
 /**
  * SECURITY-HARDENED TRANSACTION DISPATCHER
  *
  * Enforces:
- * 1. Allowlisted contracts only (HaltLayer & DemoVault)
+ * 1. Allowlisted contracts only (Studio Next & StudioNet Fallback)
  * 2. Allowlisted methods only with strict schema validation
  * 3. Fixed server-side RPC endpoint (no client SSRF)
- * 4. Fixed network Chain ID: 61999 (GenLayer StudioNet)
+ * 4. Pinned Studio Next network (Chain ID: 61997 / 0xf22d) with StudioNet fallback
  * 5. Rejection of arbitrary to/data/value/gas/signer overrides
  */
 
-const ALLOWED_CONTRACTS = {
-  HALT_LAYER: "0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23".toLowerCase(),
-  DEMO_VAULT: "0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B".toLowerCase(),
-} as const;
+const STUDIO_NEXT_HALT = "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45".toLowerCase();
+const STUDIO_NEXT_VAULT = "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9".toLowerCase();
+const STUDIONET_FALLBACK_HALT = "0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23".toLowerCase();
+const STUDIONET_FALLBACK_VAULT = "0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B".toLowerCase();
+
+function isHaltLayerTarget(addr: string): boolean {
+  const clean = addr.toLowerCase().trim();
+  const envAddr = (process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS || "").toLowerCase().trim();
+  return clean === STUDIO_NEXT_HALT || clean === STUDIONET_FALLBACK_HALT || (Boolean(envAddr) && clean === envAddr);
+}
+
+function isDemoVaultTarget(addr: string): boolean {
+  const clean = addr.toLowerCase().trim();
+  const envAddr = (process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS || "").toLowerCase().trim();
+  return clean === STUDIO_NEXT_VAULT || clean === STUDIONET_FALLBACK_VAULT || (Boolean(envAddr) && clean === envAddr);
+}
+
+function getDefaultHaltLayer(): string {
+  return process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS || STUDIO_NEXT_HALT;
+}
+
+function getDefaultDemoVault(): string {
+  return process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS || STUDIO_NEXT_VAULT;
+}
 
 interface NormalizedAction {
   target: string;
@@ -33,7 +58,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 1. Submit Incident
   if (rawAction === "submit_incident" || rawAction === "submitIncident") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.HALT_LAYER) {
+    if (rawTarget && !isHaltLayerTarget(rawTarget)) {
       return { error: `Unauthorized target address for submit_incident: ${rawTarget}` };
     }
     const targetProtocol = body.targetProtocol || (body.args && body.args[0]) || "";
@@ -56,7 +81,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.HALT_LAYER,
+        target: rawTarget || getDefaultHaltLayer(),
         method: "submit_incident",
         args: [targetProtocol.trim(), description.trim(), txHashes.trim(), evidenceUrls.trim()],
       },
@@ -65,7 +90,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 2. Adjudicate Incident
   if (rawAction === "adjudicate_incident" || rawAction === "adjudicateIncident") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.HALT_LAYER) {
+    if (rawTarget && !isHaltLayerTarget(rawTarget)) {
       return { error: `Unauthorized target address for adjudicate_incident: ${rawTarget}` };
     }
     const incidentId = body.incidentId || (body.args && body.args[0]) || "";
@@ -75,7 +100,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.HALT_LAYER,
+        target: rawTarget || getDefaultHaltLayer(),
         method: "adjudicate_incident",
         args: [incidentId.trim()],
       },
@@ -84,7 +109,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 3. Appeal Incident
   if (rawAction === "appeal_incident" || rawAction === "appealIncident") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.HALT_LAYER) {
+    if (rawTarget && !isHaltLayerTarget(rawTarget)) {
       return { error: `Unauthorized target address for appeal_incident: ${rawTarget}` };
     }
     const incidentId = body.incidentId || (body.args && body.args[0]) || "";
@@ -99,7 +124,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.HALT_LAYER,
+        target: rawTarget || getDefaultHaltLayer(),
         method: "appeal_incident",
         args: [incidentId.trim(), reason.trim()],
       },
@@ -108,7 +133,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 4. Resolve Appeal
   if (rawAction === "resolve_appeal" || rawAction === "resolveAppeal") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.HALT_LAYER) {
+    if (rawTarget && !isHaltLayerTarget(rawTarget)) {
       return { error: `Unauthorized target address for resolve_appeal: ${rawTarget}` };
     }
     const incidentId = body.incidentId || (body.args && body.args[0]) || "";
@@ -124,7 +149,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.HALT_LAYER,
+        target: rawTarget || getDefaultHaltLayer(),
         method: "resolve_appeal",
         args: [incidentId.trim(), overturn, notes.trim()],
       },
@@ -133,7 +158,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 5. Deposit to DemoVault
   if (rawAction === "deposit") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.DEMO_VAULT) {
+    if (rawTarget && !isDemoVaultTarget(rawTarget)) {
       return { error: `Unauthorized target address for deposit: ${rawTarget}` };
     }
     const amount = Number(body.amount !== undefined ? body.amount : (body.args && body.args[0]));
@@ -143,7 +168,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.DEMO_VAULT,
+        target: rawTarget || getDefaultDemoVault(),
         method: "deposit",
         args: [Math.floor(amount)],
       },
@@ -152,7 +177,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 6. Withdraw from DemoVault
   if (rawAction === "withdraw") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.DEMO_VAULT) {
+    if (rawTarget && !isDemoVaultTarget(rawTarget)) {
       return { error: `Unauthorized target address for withdraw: ${rawTarget}` };
     }
     const amount = Number(body.amount !== undefined ? body.amount : (body.args && body.args[0]));
@@ -162,7 +187,7 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.DEMO_VAULT,
+        target: rawTarget || getDefaultDemoVault(),
         method: "withdraw",
         args: [Math.floor(amount)],
       },
@@ -171,13 +196,13 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 7. Pause DemoVault
   if (rawAction === "pause") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.DEMO_VAULT) {
+    if (rawTarget && !isDemoVaultTarget(rawTarget)) {
       return { error: `Unauthorized target address for pause: ${rawTarget}` };
     }
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.DEMO_VAULT,
+        target: rawTarget || getDefaultDemoVault(),
         method: "pause",
         args: [],
       },
@@ -186,13 +211,13 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
 
   // 8. Resume DemoVault
   if (rawAction === "resume") {
-    if (rawTarget && rawTarget !== ALLOWED_CONTRACTS.DEMO_VAULT) {
+    if (rawTarget && !isDemoVaultTarget(rawTarget)) {
       return { error: `Unauthorized target address for resume: ${rawTarget}` };
     }
 
     return {
       action: {
-        target: ALLOWED_CONTRACTS.DEMO_VAULT,
+        target: rawTarget || getDefaultDemoVault(),
         method: "resume",
         args: [],
       },
@@ -215,72 +240,45 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Fixed server-side RPC destination (no client endpoint override to prevent SSRF)
+    // 2. Fixed server-side RPC destination (SSRF protection)
     const targetRpc =
       process.env.GENLAYER_RPC_URL ||
       process.env.NEXT_PUBLIC_GENLAYER_RPC_URL ||
-      "https://studio.genlayer.com/api";
+      "https://studio-next.genlayer.com/api";
 
-    // 3. Sender address (server-side configured for StudioNet gasless transactions)
-    const sender =
-      process.env.GENLAYER_SENDER_ADDRESS ||
-      "0x1111111111111111111111111111111111111111";
+    const isStudioNext =
+      targetRpc.includes("studio-next") ||
+      targetRpc.includes("studio-dev") ||
+      process.env.NEXT_PUBLIC_NETWORK_NAME === "studio_next";
 
-    // 4. Encode payload strictly with verified method and typed args
-    const serializedData = encodeGenCallPayload(action.method, action.args);
+    const chainId = isStudioNext ? 61997 : 61999;
+    const networkName = isStudioNext ? "Studio Next" : "GenLayer StudioNet";
 
-    // 5. Fixed transaction payload with chain ID 61999
-    const txPayload = {
-      jsonrpc: "2.0",
-      id: Date.now(),
-      method: "eth_sendTransaction",
-      params: [
-        {
-          from: sender,
-          to: action.target,
-          data: serializedData,
-          gas: "0x100000",
-        },
-      ],
+    const privateKey = (process.env.GENLAYER_RELAY_PRIVATE_KEY || generatePrivateKey()) as `0x${string}`;
+    const account = createAccount(privateKey);
+    const baseChain = isStudioNext ? chains.studioDevnet : chains.studionet;
+    const chain = {
+      ...baseChain,
+      id: chainId,
+      rpcUrls: { default: { http: [targetRpc] } },
     };
+    const client = createClient({ chain, account });
 
-    let txHash: string | null = null;
-    let rpcErrorMessage: string | null = null;
-
-    try {
-      const response = await fetch(targetRpc, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(txPayload),
-      });
-
-      const resJson = await response.json();
-      if (resJson.result) {
-        txHash = resJson.result;
-      } else if (resJson.error) {
-        rpcErrorMessage = resJson.error.message || `RPC error ${resJson.error.code}`;
-      }
-    } catch (e: any) {
-      rpcErrorMessage = e.message || "Failed to reach GenLayer RPC node";
-    }
-
-    if (!txHash) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: rpcErrorMessage || "Transaction rejected by GenLayer node",
-        },
-        { status: 502 }
-      );
-    }
+    const fees = await client.estimateTransactionFees();
+    const txHash = await client.writeContract({
+      address: action.target as `0x${string}`,
+      functionName: action.method,
+      args: action.args,
+      fees,
+    });
 
     return NextResponse.json({
       success: true,
       txHash,
       method: action.method,
       target: action.target,
-      chainId: 61999,
-      network: "GenLayer StudioNet",
+      chainId,
+      network: networkName,
     });
   } catch (err: any) {
     return NextResponse.json(

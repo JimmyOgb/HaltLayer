@@ -43,11 +43,11 @@ export const AppealModal: React.FC<AppealModalProps> = ({
     setPendingTx({
       targetAddress: haltLayerAddress,
       contractName: "HaltLayer (Autonomous Circuit Breaker)",
-      networkName: "GenLayer StudioNet",
-      chainId: 61999,
+      networkName: "GenLayer Studio Next",
+      chainId: 61997,
       methodName: "appeal_incident",
       purpose: `Submit formal mitigation appeal for incident ${incident.incident_id} to Security Council.`,
-      value: "0 GEN (Gasless on StudioNet)",
+      value: "Fee-funded by Studio Next policy (0 user cost)",
       changesState: true,
       stateEffect: `Transitions incident ${incident.incident_id} state to APPEALED.`,
       onConfirm: async () => {
@@ -75,13 +75,13 @@ export const AppealModal: React.FC<AppealModalProps> = ({
     setPendingTx({
       targetAddress: haltLayerAddress,
       contractName: "HaltLayer (Autonomous Circuit Breaker)",
-      networkName: "GenLayer StudioNet",
-      chainId: 61999,
+      networkName: "GenLayer Studio Next",
+      chainId: 61997,
       methodName: "resolve_appeal",
       purpose: overturn
         ? `Overturn halt on incident ${incident.incident_id} and resume DemoVault operations.`
         : `Uphold emergency halt on incident ${incident.incident_id} as permanent security measure.`,
-      value: "0 GEN (Gasless on StudioNet)",
+      value: "Fee-funded by Studio Next policy (0 user cost)",
       changesState: true,
       stateEffect: overturn
         ? `Transitions incident ${incident.incident_id} to RESOLVED_RESUME and safely resumes DemoVault.`

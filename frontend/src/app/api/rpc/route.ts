@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const ALLOWED_RPC_ENDPOINTS = new Set([
+  "https://studio-next.genlayer.com/api",
+  "https://studio-dev.genlayer.com/api",
   "https://studio.genlayer.com/api",
   "https://testnet-bradbury.genlayer.foundation",
   "http://127.0.0.1:4000/api",
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Enforce SSRF protection: only allowlisted RPC destinations permitted
-    let targetUrl = "https://studio.genlayer.com/api";
+    let targetUrl = "https://studio-next.genlayer.com/api";
     if (endpoint && typeof endpoint === "string") {
       const trimmed = endpoint.trim();
       if (ALLOWED_RPC_ENDPOINTS.has(trimmed)) {

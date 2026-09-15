@@ -35,11 +35,18 @@ export const NetworkModal: React.FC<NetworkModalProps> = ({ isOpen, onClose }) =
 
   const presets = [
     {
+      name: "studio_next",
+      label: "GenLayer Studio Next (Active)",
+      url: "https://studio-next.genlayer.com/api",
+      chainId: 61997,
+      desc: "GenLayer Consensus v0.6 network, fee-funded policy (Chain ID: 61997)",
+    },
+    {
       name: "studionet",
-      label: "GenLayer StudioNet (Gasless)",
+      label: "GenLayer StudioNet (Fallback)",
       url: "https://studio.genlayer.com/api",
       chainId: 61999,
-      desc: "Hosted Studio network, 0 GEN required (Chain ID: 61999)",
+      desc: "Historical StudioNet fallback deployment (Chain ID: 61999)",
     },
     {
       name: "testnet_bradbury",
@@ -52,8 +59,8 @@ export const NetworkModal: React.FC<NetworkModalProps> = ({ isOpen, onClose }) =
       name: "localnet",
       label: "Localnet (GenLayer Studio)",
       url: "http://127.0.0.1:4000/api",
-      chainId: 61999,
-      desc: "Local validator cluster running via genlayer up (Chain ID: 61999)",
+      chainId: 61997,
+      desc: "Local validator cluster running via genlayer up (Chain ID: 61997)",
     },
   ];
 

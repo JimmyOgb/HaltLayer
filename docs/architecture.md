@@ -150,31 +150,46 @@ In compliance with GenLayer contract standards, **zero state mutation occurs ins
 
 | Method | Access | Description |
 |---|---|---|
-| 
-egister_protocol(target, name, capability, min_quality) | Protocol Owner | Registers or updates a protocol under HaltLayer protection |
-| submit_incident(target, description, tx_hashes, evidence_urls) | Public | Submits exploit incident report with external evidence |
-| djudicate_incident(incident_id) | Public | Triggers nondeterministic consensus adjudication |
-| ppeal_incident(incident_id, appeal_reason) | Protocol Owner | Submits formal appeal against an accepted halt |
-| 
-esolve_appeal(incident_id, resume_protocol, reason) | Admin/Multisig | Adjudicates appeal to resume protocol or lock final halt |
-| get_protocol(target) | View | Returns protocol registration metadata and status |
-| get_incident(incident_id) | View | Returns incident report, evaluation results, and status |
-| get_protection_status(target) | View | Returns protocol protection status string |
-| get_protocol_count() | View | Returns total registered protocol count |
-| get_incident_count() | View | Returns total submitted incident count |
+| `register_protocol(target, name, capability, min_quality)` | Protocol Owner | Registers or updates a protocol under HaltLayer protection |
+| `submit_incident(target, description, tx_hashes, evidence_urls)` | Public | Submits exploit incident report with external evidence |
+| `adjudicate_incident(incident_id)` | Public | Triggers nondeterministic consensus adjudication |
+| `appeal_incident(incident_id, appeal_reason)` | Protocol Owner | Submits formal appeal against an accepted halt |
+| `resolve_appeal(incident_id, resume_protocol, reason)` | Admin/Multisig | Adjudicates appeal to resume protocol or lock final halt |
+| `get_protocol(target)` | View | Returns protocol registration metadata and status |
+| `get_incident(incident_id)` | View | Returns incident report, evaluation results, and status |
+| `get_protection_status(target)` | View | Returns protocol protection status string |
+| `get_protocol_count()` | View | Returns total registered protocol count |
+| `get_incident_count()` | View | Returns total submitted incident count |
 
 ### DemoVault (contracts/demo_vault.py)
 
 | Method | Access | Description |
 |---|---|---|
-| deposit(amount) | Public | Deposits funds into vault (reverts if paused) |
-| withdraw(amount) | Public | Withdraws funds from vault (reverts if paused) |
-| pause() | Circuit Breaker / Owner | Halts all deposit and withdrawal operations |
-| 
-esume() | Circuit Breaker / Owner | Restores normal operations |
-| ctivate_safe_mode() | Circuit Breaker / Owner | Switches vault to safe mode |
-| set_circuit_breaker(new_cb) | Owner | Updates authorized circuit-breaker address |
-| get_balance(account) | View | Returns account balance |
-| get_total_staked() | View | Returns total deposits in vault |
-| is_paused() | View | Returns boolean paused status |
-| get_circuit_breaker() | View | Returns circuit breaker contract address |
+| `deposit(amount)` | Public | Deposits funds into vault (reverts if paused) |
+| `withdraw(amount)` | Public | Withdraws funds from vault (reverts if paused) |
+| `pause()` | Circuit Breaker / Owner | Halts all deposit and withdrawal operations |
+| `resume()` | Circuit Breaker / Owner | Restores normal operations |
+| `activate_safe_mode()` | Circuit Breaker / Owner | Switches vault to safe mode |
+| `set_circuit_breaker(new_cb)` | Owner | Updates authorized circuit-breaker address |
+| `get_balance(account)` | View | Returns account balance |
+| `get_total_staked()` | View | Returns total deposits in vault |
+| `is_paused()` | View | Returns boolean paused status |
+| `get_circuit_breaker()` | View | Returns circuit breaker contract address |
+
+---
+
+## 6. Network Deployments
+
+### Primary Target: GenLayer Studio Next
+- **Chain ID**: `61997` (`0xf22d`)
+- **RPC Endpoint**: `https://studio-next.genlayer.com/api`
+- **Explorer**: `https://explorer-studio-dev.genlayer.com/`
+- **HaltLayer**: `0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`
+- **DemoVault**: `0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`
+
+### Preserved Fallback: GenLayer StudioNet
+- **Chain ID**: `61999` (`0xf22f`)
+- **RPC Endpoint**: `https://studio.genlayer.com/api`
+- **Explorer**: `https://genlayer-explorer.vercel.app`
+- **HaltLayer**: `0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`
+- **DemoVault**: `0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B`
