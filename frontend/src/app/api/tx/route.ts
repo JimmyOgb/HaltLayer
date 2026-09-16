@@ -19,11 +19,18 @@ import { generatePrivateKey } from "viem/accounts";
  * 10. Official GenLayer SDK chain definition (chains.studioDevnet, Chain ID 61997 / 0xf22d)
  */
 
-const STUDIO_NEXT_HALT = "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45".toLowerCase();
-const STUDIO_NEXT_VAULT = "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9".toLowerCase();
+const STUDIO_NEXT_HALT = "0x178D62fB059467545b0b3059C8A1A83C98E0b45E".toLowerCase();
+const STUDIO_NEXT_VAULT = "0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0".toLowerCase();
 
-const OLD_STUDIONET_HALT = "0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23".toLowerCase();
-const OLD_STUDIONET_VAULT = "0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B".toLowerCase();
+// Explicitly rejected previous contract addresses
+const REJECTED_OLD_TARGETS = new Set([
+  "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45".toLowerCase(),
+  "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9".toLowerCase(),
+  "0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23".toLowerCase(),
+  "0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B".toLowerCase(),
+]);
+
+const ALLOWED_TARGETS = new Set([STUDIO_NEXT_HALT, STUDIO_NEXT_VAULT]);
 
 const FIXED_RPC_URL = "https://studio-next.genlayer.com/api";
 const CHAIN_ID = 61997;
@@ -70,10 +77,17 @@ function normalizeAndValidate(body: any): { action?: NormalizedAction; error?: s
     return { error: "Missing or invalid action/functionName" };
   }
 
-  // 5. Explicitly reject old StudioNet contract targets
-  if (rawTarget === OLD_STUDIONET_HALT || rawTarget === OLD_STUDIONET_VAULT) {
+  // 5. Explicitly reject previous contract targets
+  if (REJECTED_OLD_TARGETS.has(rawTarget)) {
     return {
-      error: `Security violation: Target ${rawTarget} is an old StudioNet contract. All transactions must target production Studio Next contracts (${STUDIO_NEXT_HALT} or ${STUDIO_NEXT_VAULT}).`,
+      error: `Security violation: Target ${rawTarget} is an old contract address. All transactions must target production Studio Next contracts (${STUDIO_NEXT_HALT} or ${STUDIO_NEXT_VAULT}).`,
+    };
+  }
+
+  // 6. Ensure target is allowlisted
+  if (rawTarget && !ALLOWED_TARGETS.has(rawTarget)) {
+    return {
+      error: `Security violation: Target ${rawTarget} is not allowlisted. Wallet writes can target only ${STUDIO_NEXT_HALT} or ${STUDIO_NEXT_VAULT}.`,
     };
   }
 

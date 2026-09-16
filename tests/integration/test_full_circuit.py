@@ -11,10 +11,20 @@ Executes the complete autonomous circuit-breaker lifecycle under live validator 
 8. Exercise appeal and resolution workflow
 """
 import pytest
+import urllib.request
 from gltest import get_contract_factory
 from gltest.assertions import tx_execution_succeeded
 
 
+def _is_localnet_available() -> bool:
+    try:
+        urllib.request.urlopen("http://127.0.0.1:4000/api", timeout=0.5)
+        return True
+    except Exception:
+        return False
+
+
+@pytest.mark.skipif(not _is_localnet_available(), reason="Localnet not running at http://127.0.0.1:4000/api")
 def test_full_circuit_consensus():
     """
     End-to-end integration test of the HaltLayer circuit breaker.

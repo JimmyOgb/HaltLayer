@@ -48,10 +48,10 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     process.env.NEXT_PUBLIC_NETWORK_NAME || "studio_next"
   );
   const [haltLayerAddress, setHaltLayerAddress] = useState<string>(
-    process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS || "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45"
+    process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS || "0x178D62fB059467545b0b3059C8A1A83C98E0b45E"
   );
   const [demoVaultAddress, setDemoVaultAddress] = useState<string>(
-    process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS || "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9"
+    process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS || "0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0"
   );
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<TransactionStatus[]>([]);
@@ -88,23 +88,21 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [chainId, setChainId] = useState<string | null>(null);
 
-  // Studio Next (Primary) & StudioNet (Fallback) Chain Specifications
+  // Studio Next Chain Specifications (61997 / 0xf22d)
   const GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX = "0xf22d"; // 61997
   const GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC = 61997;
-  const GENLAYER_STUDIONET_CHAIN_ID_HEX = "0xf22f"; // 61999
-  const GENLAYER_STUDIONET_CHAIN_ID_DEC = 61999;
 
   const isChainMatch = (cId: string | null): boolean => {
     if (!cId) return false;
     const clean = cId.toLowerCase().trim();
-    if (clean === GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX || clean === GENLAYER_STUDIONET_CHAIN_ID_HEX) return true;
+    if (clean === GENLAYER_STUDIO_NEXT_CHAIN_ID_HEX) return true;
     try {
       if (clean.startsWith("0x")) {
         const parsed = parseInt(clean, 16);
-        return parsed === GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC || parsed === GENLAYER_STUDIONET_CHAIN_ID_DEC;
+        return parsed === GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC;
       }
       const num = Number(clean);
-      return num === GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC || num === GENLAYER_STUDIONET_CHAIN_ID_DEC;
+      return num === GENLAYER_STUDIO_NEXT_CHAIN_ID_DEC;
     } catch {
       return false;
     }
@@ -329,16 +327,33 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [rpcUrl, networkName, haltLayerAddress, demoVaultAddress, walletAddress, haltClient, rpcClient, vaultClient]);
 
-  // Load stored addresses from localStorage on mount
+  // Load stored addresses from localStorage on mount (rejecting stale historical addresses)
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const HISTORICAL_ADDRESSES = new Set([
+        "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45".toLowerCase(),
+        "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9".toLowerCase(),
+        "0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23".toLowerCase(),
+        "0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B".toLowerCase(),
+      ]);
+
       const storedHalt = localStorage.getItem("hl_halt_layer_addr");
       const storedVault = localStorage.getItem("hl_demo_vault_addr");
       const storedNetwork = localStorage.getItem("hl_network_name");
       const storedRpc = localStorage.getItem("hl_rpc_url");
 
-      if (storedHalt) setHaltLayerAddress(storedHalt);
-      if (storedVault) setDemoVaultAddress(storedVault);
+      if (storedHalt && !HISTORICAL_ADDRESSES.has(storedHalt.toLowerCase())) {
+        setHaltLayerAddress(storedHalt);
+      } else if (storedHalt && HISTORICAL_ADDRESSES.has(storedHalt.toLowerCase())) {
+        localStorage.removeItem("hl_halt_layer_addr");
+      }
+
+      if (storedVault && !HISTORICAL_ADDRESSES.has(storedVault.toLowerCase())) {
+        setDemoVaultAddress(storedVault);
+      } else if (storedVault && HISTORICAL_ADDRESSES.has(storedVault.toLowerCase())) {
+        localStorage.removeItem("hl_demo_vault_addr");
+      }
+
       if (storedNetwork) setNetworkName(storedNetwork);
       if (storedRpc) setRpcUrl(storedRpc);
     }

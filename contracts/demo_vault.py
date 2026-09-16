@@ -111,7 +111,7 @@ class DemoVault(gl.contract.Contract):
             return True
         if self.circuit_breaker.as_hex != "0x0000000000000000000000000000000000000000":
             try:
-                cb = gl.contract.get_at(self.circuit_breaker)
+                cb = gl.get_contract_at(self.circuit_breaker)
                 if cb.view().get_protection_status(gl.message.contract_address.as_hex) == "HALTED":
                     return True
             except Exception:
@@ -124,7 +124,7 @@ class DemoVault(gl.contract.Contract):
             return True
         if self.circuit_breaker.as_hex != "0x0000000000000000000000000000000000000000":
             try:
-                cb = gl.contract.get_at(self.circuit_breaker)
+                cb = gl.get_contract_at(self.circuit_breaker)
                 if cb.view().get_protection_status(gl.message.contract_address.as_hex) == "SAFE_MODE":
                     return True
             except Exception:

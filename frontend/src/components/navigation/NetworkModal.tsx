@@ -72,7 +72,7 @@ export const NetworkModal: React.FC<NetworkModalProps> = ({ isOpen, onClose }) =
   const handleSave = () => {
     setNetwork(selectedNetwork, customRpc);
     setContractAddresses(haltAddr, vaultAddr);
-    if (selectedNetwork === "studionet" && walletAddress && !isCorrectChain) {
+    if (selectedNetwork === "studio_next" && walletAddress && !isCorrectChain) {
       switchToGenLayerNetwork().catch((e) => console.warn("Network switch prompt:", e));
     }
     refreshState();

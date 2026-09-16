@@ -45,6 +45,9 @@ export interface Incident {
   appellant: string;
   appeal_reason: string;
   appeal_resolution: string;
+  evidence_supports_action?: boolean;
+  independent_target_match?: boolean;
+  confidence?: string;
 }
 
 export interface DemoVaultState {

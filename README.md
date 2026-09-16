@@ -142,18 +142,18 @@ HaltLayer and DemoVault are actively deployed and verified on **GenLayer Studio 
 * **Chain ID**: `61997` (`0xf22d`)
 * **RPC Endpoint**: `https://studio-next.genlayer.com/api`
 * **Block Explorer**: [https://explorer-studio-dev.genlayer.com/](https://explorer-studio-dev.genlayer.com/)
-* **HaltLayer Intelligent Contract**: [`0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`](https://explorer-studio-dev.genlayer.com/address/0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45)
-  - Deployment Tx: `0x241fab1a52f72fbaaaad6adc961ad8e6348b4479ff22bff7eeb270581dde92cd`
-* **DemoVault Intelligent Contract**: [`0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`](https://explorer-studio-dev.genlayer.com/address/0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9)
-  - Deployment Tx: `0xc4ebb28dfdacaf24a295ea115a989c72b3aaf32f3ee92c88d3b1ef3666786c81`
-* **Deployer / Admin Address**: `0x140134f0e74b7F243E94a4c4BFE6910A2B11c1d0`
+* **HaltLayer Intelligent Contract**: [`0x178D62fB059467545b0b3059C8A1A83C98E0b45E`](https://explorer-studio-dev.genlayer.com/address/0x178D62fB059467545b0b3059C8A1A83C98E0b45E)
+  - Deployment Tx: `0x0ac5de8a7c7b8837187b3b201abc997d9aebf87a8449e9dbc03a1157f661c6d1`
+* **DemoVault Intelligent Contract**: [`0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0`](https://explorer-studio-dev.genlayer.com/address/0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0)
+  - Deployment Tx: `0x7c0abb047af72122cf0c65a159e84712c6b15624dbdb419e634fec27d71040d2`
+* **Deployer / Admin Address**: `0x2550Eb9B2CE5019CB4e14E6cB8BdB4d7d62F11a2`
 
 #### Controlled Studio Next Live Test Runs
 
 ##### Negative Control — Incident `INC-1` (`[INC-LIVE-NEGATIVE-NEXT]`)
 * **Evidence**: Unverified social post without trace or transaction hashes.
-* **Submission Tx**: `0x06005741adcbab93ea0ce55f2a8caf2a0381a2f6767ced77a4b92834bd5efb38`
-* **Adjudication Tx**: `0x78499f7cb92e1cbc17f224430148b1e4eb9bf2c143c7c454b301ef268800d95d`
+* **Submission Tx**: `0x6a655a8fdf116435474cb108ce3ed0c3319ff9cd823e2792b1b5c0b78e8316f9`
+* **Adjudication Tx**: `0x96bdb3f80376ba50d5ab44d4571258ae3c9dc351de04066d13d751721e624b82`
 * **Consensus Outcome**: `ACCEPTED` (GenLayer validator consensus confirmed)
 * **Final Incident State**: `REJECTED` (`threat_severity: none`, `evidence_quality: weak`, `recommended_action: NO_ACTION`)
 * **Protection Status**: **`ACTIVE`**
@@ -161,8 +161,8 @@ HaltLayer and DemoVault are actively deployed and verified on **GenLayer Studio 
 
 ##### Positive Control — Incident `INC-2` (`[INC-LIVE-POSITIVE-NEXT]`)
 * **Evidence**: Structured forensic audit telemetry citing recursive reentrancy exploit on DemoVault reserves.
-* **Submission Tx**: `0x3f4e88597911a25f6476f82d036c1e8278e0f7f15c930bcffb90f8b3ae5247eb`
-* **Adjudication Tx**: `0xe8cb7384df100d194ee40d12686e5d03b56ba302b2c7bdcbcfacbb67f9d6be2c`
+* **Submission Tx**: `0x497b1f2d9b76ee7618877cadfcd50b3cf82e90d5fe506b24cb27953e24d8b92b`
+* **Adjudication Tx**: `0x80e2ae3ee239aeac329e947a83a6555d15b53879d663973e526e618a27681f02`
 * **Consensus Outcome**: `ACCEPTED` (GenLayer validator consensus confirmed)
 * **Final Incident State**: `HALT_ACCEPTED` (`threat_severity: critical`, `evidence_quality: strong`, `recommended_action: HALT`)
 * **Protection Status**: **`HALTED`**
@@ -198,7 +198,7 @@ Preserved as a historical fallback per hackathon migration rules:
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │               HaltLayer Intelligent Contract                │
-│             0x6ec1...BB45 (Studio Next, 61997)              │
+│             0x178D...b45E (Studio Next, 61997)              │
 ├─────────────────────────────────────────────────────────────┤
 │ 1. Leader Execution (gl.vm.run_nondet)                      │
 │    - Fetches web telemetry (gl.nondet.web.get)              │
@@ -213,7 +213,7 @@ Preserved as a historical fallback per hackathon migration rules:
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                 DemoVault Protected Protocol                │
-│             0x30B4...d0F9 (Studio Next, 61997)              │
+│             0xE096...E3E0 (Studio Next, 61997)              │
 ├─────────────────────────────────────────────────────────────┤
 │ - is_paused() == true                                       │
 │ - Unauthorized withdrawals immediately REVERT               │
@@ -422,8 +422,8 @@ Every state-modifying action requires explicit confirmation through a transparen
 ### 5. Verified Deployment Addresses
 * **Studio Next (Active Hackathon Target)**:
   * Network: Studio Next (`https://studio-next.genlayer.com/api`, Chain ID `61997` / `0xf22d`)
-  * HaltLayer Contract: `0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`
-  * DemoVault Contract: `0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`
+  * HaltLayer Contract: `0x178D62fB059467545b0b3059C8A1A83C98E0b45E`
+  * DemoVault Contract: `0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0`
   * Explorer: `https://explorer-studio-dev.genlayer.com/`
 * **StudioNet (Historical Fallback)**:
   * Network: StudioNet (`https://studio.genlayer.com/api`, Chain ID `61999` / `0xf22f`)

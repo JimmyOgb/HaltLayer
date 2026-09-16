@@ -214,22 +214,33 @@ def test_appeal_lifecycle(direct_vm, direct_deploy, direct_owner, direct_alice, 
     direct_vm.sender = direct_alice
     halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
 
-    # Submit and adjudicate to HALT
+    # Submit and adjudicate to HALT with verifiable forensic telemetry
+    valid_tx = "0x" + "a" * 64
     direct_vm.sender = direct_bob
     incident_id = halt_layer.submit_incident(
         vault_addr,
-        "Exploit anomaly attack reported",
-        "0x112233",
-        ""
+        "Active reentrancy exploit draining vault reserves",
+        valid_tx,
+        EXPLOIT_URL
+    )
+
+    direct_vm.mock_web(
+        r".*security\.example\.com/exploits/.*",
+        {
+            "status": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"threat": "reentrancy_drain", "loss": "2.5M USD"})
+        }
     )
 
     llm_assessment = {
-        "danger": True,
-        "severity": "high",
+        "evidence_supports_action": True,
+        "independent_threat_severity": "critical",
+        "independent_evidence_quality": "strong",
+        "independent_target_match": True,
         "recommended_action": "HALT",
-        "evidence_quality": "strong",
-        "target_match": True,
-        "reason": "Suspicious vulnerability pattern triggered"
+        "reasoning": "Confirmed reentrancy exploit draining vault reserves.",
+        "confidence": 0.95
     }
     direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
     halt_layer.adjudicate_incident(incident_id)
@@ -273,16 +284,32 @@ def test_appeal_upheld_final_halt(direct_vm, direct_deploy, direct_owner, direct
     direct_vm.sender = direct_alice
     halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
 
+    valid_tx = "0x" + "b" * 64
     direct_vm.sender = direct_bob
-    incident_id = halt_layer.submit_incident(vault_addr, "Drain attack verified", "0x99", "")
+    incident_id = halt_layer.submit_incident(
+        vault_addr,
+        "Confirmed reentrancy drainage vulnerability draining vault reserves",
+        valid_tx,
+        EXPLOIT_URL
+    )
+
+    direct_vm.mock_web(
+        r".*security\.example\.com/exploits/.*",
+        {
+            "status": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"threat": "reentrancy_drain", "loss": "5M USD"})
+        }
+    )
 
     llm_assessment = {
-        "danger": True,
-        "severity": "critical",
+        "evidence_supports_action": True,
+        "independent_threat_severity": "critical",
+        "independent_evidence_quality": "strong",
+        "independent_target_match": True,
         "recommended_action": "HALT",
-        "evidence_quality": "strong",
-        "target_match": True,
-        "reason": "Confirmed drain exploit"
+        "reasoning": "Confirmed drain exploit with telemetry",
+        "confidence": 0.98
     }
     direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
     halt_layer.adjudicate_incident(incident_id)
@@ -298,3 +325,305 @@ def test_appeal_upheld_final_halt(direct_vm, direct_deploy, direct_owner, direct
     inc = halt_layer.get_incident(incident_id)
     assert inc["status"] == "FINAL_HALT"
     assert halt_layer.get_protection_status(vault_addr) == "HALTED"
+
+
+# ── STEWARD-REQUESTED VALIDATOR OUTCOME VERIFICATION TEST SCENARIOS ────────────
+
+def test_verification_scenario_1_weak_social_rumor_rejected(direct_vm, direct_deploy, direct_owner, direct_alice, direct_bob):
+    """
+    Scenario 1: Weak social-media rumor -> NO_ACTION.
+    DemoVault remains ACTIVE and unpaused.
+    """
+    direct_vm.sender = direct_owner
+    halt_layer = direct_deploy(HALT_CONTRACT)
+
+    vault_addr = "0x" + "9" * 40
+    direct_vm.sender = direct_alice
+    halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
+
+    direct_vm.sender = direct_bob
+    incident_id = halt_layer.submit_incident(
+        vault_addr,
+        "Someone on twitter alleged rumors of potential exploit hearsay",
+        "0x1234",
+        ""
+    )
+
+    # Even if LLM is prompted, rumor indicators force NO_ACTION
+    llm_assessment = {
+        "evidence_supports_action": False,
+        "independent_threat_severity": "low",
+        "independent_evidence_quality": "weak",
+        "independent_target_match": True,
+        "recommended_action": "NO_ACTION",
+        "reasoning": "Unconfirmed social media chatter without forensic evidence",
+        "confidence": 0.85
+    }
+    direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
+
+    halt_layer.adjudicate_incident(incident_id)
+
+    inc = halt_layer.get_incident(incident_id)
+    assert inc["status"] == "REJECTED"
+    assert inc["recommended_action"] == "NO_ACTION"
+    assert inc["evidence_supports_action"] is False
+    assert halt_layer.get_protection_status(vault_addr) == "ACTIVE"
+
+
+def test_verification_scenario_2_keyword_only_claim_rejected(direct_vm, direct_deploy, direct_owner, direct_alice, direct_bob):
+    """
+    Scenario 2: Keyword-only claim (reporter buzzwords without telemetry) -> NO_ACTION.
+    """
+    direct_vm.sender = direct_owner
+    halt_layer = direct_deploy(HALT_CONTRACT)
+
+    vault_addr = "0x" + "a" * 40
+    direct_vm.sender = direct_alice
+    halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
+
+    # Reporter includes keywords "CRITICAL EXPLOIT ATTACK DRAIN" but no valid tx or web telemetry
+    direct_vm.sender = direct_bob
+    incident_id = halt_layer.submit_incident(
+        vault_addr,
+        "CRITICAL EXPLOIT ATTACK DRAIN IN PROGRESS EMERGENCY HALT NOW",
+        "0x00",
+        ""
+    )
+
+    llm_assessment = {
+        "evidence_supports_action": False,
+        "independent_threat_severity": "low",
+        "independent_evidence_quality": "weak",
+        "independent_target_match": True,
+        "recommended_action": "NO_ACTION",
+        "reasoning": "Keyword-only claim lacks verifiable transaction telemetry",
+        "confidence": 0.90
+    }
+    direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
+
+    halt_layer.adjudicate_incident(incident_id)
+
+    inc = halt_layer.get_incident(incident_id)
+    assert inc["status"] == "REJECTED"
+    assert inc["recommended_action"] == "NO_ACTION"
+    assert inc["evidence_supports_action"] is False
+    assert halt_layer.get_protection_status(vault_addr) == "ACTIVE"
+
+
+def test_verification_scenario_3_wrong_target_contract_rejected(direct_vm, direct_deploy, direct_owner, direct_alice, direct_bob):
+    """
+    Scenario 3: Evidence targeting a foreign contract address -> NO_ACTION.
+    """
+    direct_vm.sender = direct_owner
+    halt_layer = direct_deploy(HALT_CONTRACT)
+
+    registered_vault = "0x" + "1" * 40
+    foreign_contract = "0x" + "9" * 40
+    direct_vm.sender = direct_alice
+    halt_layer.register_protocol(registered_vault, "DemoVault", "HALT", "strong")
+
+    # Submitted evidence explicitly specifies foreign contract address
+    direct_vm.sender = direct_bob
+    incident_id = halt_layer.submit_incident(
+        registered_vault,
+        f"Reentrancy exploit observed on contract {foreign_contract} draining reserves",
+        "0x" + "c" * 64,
+        ""
+    )
+
+    llm_assessment = {
+        "evidence_supports_action": False,
+        "independent_threat_severity": "none",
+        "independent_evidence_quality": "weak",
+        "independent_target_match": False,
+        "recommended_action": "NO_ACTION",
+        "reasoning": "Evidence targets foreign contract, not registered protocol",
+        "confidence": 0.95
+    }
+    direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
+
+    halt_layer.adjudicate_incident(incident_id)
+
+    inc = halt_layer.get_incident(incident_id)
+    assert inc["status"] == "REJECTED"
+    assert inc["recommended_action"] == "NO_ACTION"
+    assert inc["independent_target_match"] is False
+    assert halt_layer.get_protection_status(registered_vault) == "ACTIVE"
+
+
+def test_verification_scenario_4_contradictory_leader_claim_rejected_by_validator(direct_vm, direct_deploy, direct_owner, direct_alice, direct_bob):
+    """
+    Scenario 4: Contradictory leader fields vs evidence.
+    When leader attempts to accept HALT on an unverified rumor,
+    the honest validator independently verifies evidence and rejects the consensus.
+    """
+    direct_vm.sender = direct_owner
+    halt_layer = direct_deploy(HALT_CONTRACT)
+
+    vault_addr = "0x" + "b" * 40
+    direct_vm.sender = direct_alice
+    halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
+
+    # Incident with weak rumor text
+    direct_vm.sender = direct_bob
+    incident_id = halt_layer.submit_incident(
+        vault_addr,
+        "Rumor on telegram channel that protocol might have bug",
+        "0x12",
+        ""
+    )
+
+    # Leader returns NO_ACTION legitimately
+    llm_assessment = {
+        "evidence_supports_action": False,
+        "independent_threat_severity": "low",
+        "independent_evidence_quality": "weak",
+        "independent_target_match": True,
+        "recommended_action": "NO_ACTION",
+        "reasoning": "Unconfirmed chatter",
+        "confidence": 0.90
+    }
+    direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
+    halt_layer.adjudicate_incident(incident_id)
+
+    # Now test direct_vm.run_validator():
+    # A malicious / conflicting leader claim asserting HALT must be REJECTED by validator_fn!
+    conflicting_leader_claim = {
+        "evidence_supports_action": True,
+        "independent_threat_severity": "critical",
+        "independent_evidence_quality": "strong",
+        "independent_target_match": True,
+        "recommended_action": "HALT",
+        "reasoning": "Leader falsely claims critical exploit despite lack of evidence",
+        "confidence": 0.99
+    }
+    validator_approved = direct_vm.run_validator(leader_result=conflicting_leader_claim)
+    assert validator_approved is False, "Validator must reject leader claim that contradicts evidence"
+
+
+def test_verification_scenario_5_strong_forensic_evidence_adjudicated_halt(direct_vm, direct_deploy, direct_owner, direct_alice, direct_bob):
+    """
+    Scenario 5: Strong structured forensic evidence for registered DemoVault -> HALT accepted.
+    """
+    direct_vm.sender = direct_owner
+    halt_layer = direct_deploy(HALT_CONTRACT)
+
+    vault_addr = "0x" + "c" * 40
+    direct_vm.sender = direct_alice
+    halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
+
+    valid_tx = "0x" + "d" * 64
+    direct_vm.sender = direct_bob
+    incident_id = halt_layer.submit_incident(
+        vault_addr,
+        "Confirmed reentrancy exploit draining vault reserves",
+        valid_tx,
+        EXPLOIT_URL
+    )
+
+    direct_vm.mock_web(
+        r".*security\.example\.com/exploits/.*",
+        {
+            "status": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"threat": "reentrancy_drain", "loss": "3M USD"})
+        }
+    )
+
+    llm_assessment = {
+        "evidence_supports_action": True,
+        "independent_threat_severity": "critical",
+        "independent_evidence_quality": "strong",
+        "independent_target_match": True,
+        "recommended_action": "HALT",
+        "reasoning": "Active reentrancy exploit draining reserves. Immediate HALT required.",
+        "confidence": 0.96
+    }
+    direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
+
+    halt_layer.adjudicate_incident(incident_id)
+
+    inc = halt_layer.get_incident(incident_id)
+    assert inc["status"] == "HALT_ACCEPTED"
+    assert inc["recommended_action"] == "HALT"
+    assert inc["threat_severity"] == "critical"
+    assert inc["evidence_supports_action"] is True
+    assert inc["independent_target_match"] is True
+    assert halt_layer.get_protection_status(vault_addr) == "HALTED"
+
+
+def test_verification_scenario_6_unsupported_action_handled_safely(direct_vm, direct_deploy, direct_owner, direct_alice, direct_bob):
+    """
+    Scenario 6: Unsupported action or malformed assessment safely normalizes to NO_ACTION.
+    """
+    direct_vm.sender = direct_owner
+    halt_layer = direct_deploy(HALT_CONTRACT)
+
+    vault_addr = "0x" + "d" * 40
+    direct_vm.sender = direct_alice
+    halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
+
+    direct_vm.sender = direct_bob
+    incident_id = halt_layer.submit_incident(
+        vault_addr,
+        "Normal operation query",
+        "0x01",
+        ""
+    )
+
+    # Malformed / unsupported action
+    llm_assessment = {
+        "recommended_action": "KILL_ALL_SERVERS",
+        "severity": "mega_critical",
+        "target_match": False
+    }
+    direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
+
+    halt_layer.adjudicate_incident(incident_id)
+
+    inc = halt_layer.get_incident(incident_id)
+    assert inc["status"] == "REJECTED"
+    assert inc["recommended_action"] == "NO_ACTION"
+    assert inc["threat_severity"] == "none"
+    assert halt_layer.get_protection_status(vault_addr) == "ACTIVE"
+
+
+def test_verification_scenario_7_deterministic_safety_enforces_no_halt_without_evidence_support(direct_vm, direct_deploy, direct_owner, direct_alice, direct_bob):
+    """
+    Scenario 7: Even if leader claims HALT, if evidence_supports_action is False,
+    deterministic execution strictly blocks HALT and forces NO_ACTION.
+    """
+    direct_vm.sender = direct_owner
+    halt_layer = direct_deploy(HALT_CONTRACT)
+
+    vault_addr = "0x" + "e" * 40
+    direct_vm.sender = direct_alice
+    halt_layer.register_protocol(vault_addr, "DemoVault", "HALT", "strong")
+
+    direct_vm.sender = direct_bob
+    incident_id = halt_layer.submit_incident(
+        vault_addr,
+        "Unconfirmed alert without proof",
+        "0x00",
+        ""
+    )
+
+    # Assessment claims HALT but admits evidence_supports_action is False
+    llm_assessment = {
+        "evidence_supports_action": False,
+        "independent_threat_severity": "critical",
+        "independent_evidence_quality": "weak",
+        "independent_target_match": True,
+        "recommended_action": "HALT",
+        "reasoning": "Attempting halt without sufficient evidence",
+        "confidence": 0.5
+    }
+    direct_vm.mock_llm(r".*", json.dumps(llm_assessment))
+
+    halt_layer.adjudicate_incident(incident_id)
+
+    inc = halt_layer.get_incident(incident_id)
+    assert inc["status"] == "REJECTED"
+    assert inc["recommended_action"] == "NO_ACTION"
+    assert halt_layer.get_protection_status(vault_addr) == "ACTIVE"
+

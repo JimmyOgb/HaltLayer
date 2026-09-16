@@ -184,8 +184,8 @@ In compliance with GenLayer contract standards, **zero state mutation occurs ins
 - **Chain ID**: `61997` (`0xf22d`)
 - **RPC Endpoint**: `https://studio-next.genlayer.com/api`
 - **Explorer**: `https://explorer-studio-dev.genlayer.com/`
-- **HaltLayer**: `0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`
-- **DemoVault**: `0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`
+- **HaltLayer**: `0x178D62fB059467545b0b3059C8A1A83C98E0b45E`
+- **DemoVault**: `0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0`
 
 ### Preserved Fallback: GenLayer StudioNet
 - **Chain ID**: `61999` (`0xf22f`)

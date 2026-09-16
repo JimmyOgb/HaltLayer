@@ -14,8 +14,8 @@ import { NextRequest, NextResponse } from "next/server";
 const STUDIO_NEXT_RPC = "https://studio-next.genlayer.com/api";
 
 const ALLOWED_TARGETS = new Set([
-  "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45".toLowerCase(),
-  "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9".toLowerCase(),
+  "0x178D62fB059467545b0b3059C8A1A83C98E0b45E".toLowerCase(),
+  "0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0".toLowerCase(),
 ]);
 
 const ALLOWED_RPC_METHODS = new Set([
@@ -26,6 +26,39 @@ const ALLOWED_RPC_METHODS = new Set([
   "eth_getTransactionReceipt",
   "eth_getTransactionByHash",
 ]);
+
+export async function GET() {
+  try {
+    const upstreamRes = await fetch(STUDIO_NEXT_RPC, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "HaltLayer-Production-Proxy",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_chainId",
+        params: [],
+      }),
+    });
+
+    if (upstreamRes.ok) {
+      const data = await upstreamRes.json();
+      return NextResponse.json(data);
+    }
+  } catch {
+    // Upstream fallback
+  }
+
+  return NextResponse.json({
+    jsonrpc: "2.0",
+    id: 1,
+    result: "0xf22d",
+    chainId: "0xf22d",
+    network: "Studio Next",
+  });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -74,7 +107,7 @@ export async function POST(req: NextRequest) {
             id: 0,
             error: {
               code: -32602,
-              message: `Unauthorized contract target for gen_call: ${targetTo}. Production Studio Next targets are: 0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45 and 0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`,
+              message: `Unauthorized contract target for gen_call: ${targetTo}. Production Studio Next targets are: 0x178D62fB059467545b0b3059C8A1A83C98E0b45E and 0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0`,
             },
           },
           { status: 400 }

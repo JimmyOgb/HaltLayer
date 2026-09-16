@@ -42,7 +42,7 @@ export const WalletSafetyModal: React.FC<WalletSafetyModalProps> = ({
 
         <div className="p-6 space-y-4 text-xs font-mono">
           <p className="text-gray-300 font-sans text-sm leading-relaxed">
-            HaltLayer is a decentralized circuit breaker deployed on <strong>GenLayer StudioNet</strong>.
+            HaltLayer is a decentralized circuit breaker deployed on <strong>GenLayer Studio Next</strong>.
             Please review our security guarantees before connecting your wallet:
           </p>
 
@@ -67,7 +67,7 @@ export const WalletSafetyModal: React.FC<WalletSafetyModalProps> = ({
               <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
               <div className="font-sans text-gray-200">
                 <strong className="text-white font-mono block">Verified Target Contracts:</strong>
-                Interactions are strictly restricted to HaltLayer (<code>0x6ec1...BB45</code>) and DemoVault (<code>0x30B4...d0F9</code>).
+                Interactions are strictly restricted to HaltLayer (<code>0x178D...b45E</code>) and DemoVault (<code>0xE096...E3E0</code>).
               </div>
             </div>
 

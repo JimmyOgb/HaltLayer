@@ -42,22 +42,22 @@ Point to the blocked transaction in the terminal:
 
 Point to the appeal resolution:
 - HaltLayer also prevents griefing or permanent lockouts. The protocol owner submits an appeal with counter-evidence and an audited patch. The security council approves the appeal, and DemoVault safely resumes normal operations.
-- All 17 direct tests pass in under 3 seconds, both contracts pass genvm-lint with zero errors, and the entire circuit breaker runs natively on GenVM.
+- All 24 direct tests pass in under 30 seconds, both contracts pass genvm-lint with zero errors, and the entire circuit breaker runs natively on GenVM.
 
 ---
 
 ## Live Studio Next Verification for Judges
 
 Judges can verify live deployments on **Studio Next** (`Chain ID: 61997` / `0xf22d`):
-* **HaltLayer Contract**: [`0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45`](https://explorer-studio-dev.genlayer.com/address/0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45)
-* **DemoVault Contract**: [`0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9`](https://explorer-studio-dev.genlayer.com/address/0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9)
+* **HaltLayer Contract**: [`0x178D62fB059467545b0b3059C8A1A83C98E0b45E`](https://explorer-studio-dev.genlayer.com/address/0x178D62fB059467545b0b3059C8A1A83C98E0b45E)
+* **DemoVault Contract**: [`0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0`](https://explorer-studio-dev.genlayer.com/address/0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0)
 * **Live Console**: [https://haltlayer.vercel.app](https://haltlayer.vercel.app)
 * **Historical StudioNet Fallback**: [`0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23`](https://genlayer-explorer.vercel.app)
 
 ## Quick Verification Commands for Judges
 
 ```bash
-# 1. Run all 17 direct tests
+# 1. Run all 24 direct tests
 pytest tests/direct/ -v
 
 # 2. Run GenVM linter

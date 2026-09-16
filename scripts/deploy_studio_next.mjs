@@ -51,6 +51,18 @@ async function waitForTx(hash, label = 'Transaction') {
   return receipt;
 }
 
+async function safeReadContract(options, maxRetries = 6, delayMs = 3000) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await client.readContract(options);
+    } catch (err) {
+      if (i === maxRetries - 1) throw err;
+      console.log(`[ReadContract Retry ${i + 1}/${maxRetries}] Transient read error: ${err.message?.slice(0, 80)}, retrying in ${delayMs}ms...`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+}
+
 async function main() {
   const haltLayerPath = path.join(rootDir, 'contracts', 'halt_layer.py');
   const demoVaultPath = path.join(rootDir, 'contracts', 'demo_vault.py');
@@ -112,12 +124,12 @@ async function main() {
   deploymentRecord.transactions.registerProtocol = regTxHash;
 
   // Verify Initial State
-  const initialProtStatus = await client.readContract({
+  const initialProtStatus = await safeReadContract({
     address: haltAddress,
     functionName: 'get_protection_status',
     args: [vaultAddress],
   });
-  const initialVaultPaused = await client.readContract({
+  const initialVaultPaused = await safeReadContract({
     address: vaultAddress,
     functionName: 'is_paused',
     args: [],
@@ -161,17 +173,17 @@ async function main() {
   await waitForTx(negAdjTxHash, 'Adjudicate Negative Control Incident');
   deploymentRecord.transactions.adjudicateNegativeIncident = negAdjTxHash;
 
-  const inc1Details = await client.readContract({
+  const inc1Details = await safeReadContract({
     address: haltAddress,
     functionName: 'get_incident',
     args: [incident1Id],
   });
-  const negVaultPaused = await client.readContract({
+  const negVaultPaused = await safeReadContract({
     address: vaultAddress,
     functionName: 'is_paused',
     args: [],
   });
-  const negProtStatus = await client.readContract({
+  const negProtStatus = await safeReadContract({
     address: haltAddress,
     functionName: 'get_protection_status',
     args: [vaultAddress],
@@ -202,7 +214,7 @@ async function main() {
     args: [
       vaultAddress,
       'Critical recursive reentrancy drain exploit observed with unauthorized malicious vault withdrawal spike draining pool reserves',
-      '0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b',
+      '0x9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9a8b7c6d5e4f3a2b1c0d9e8f',
       '',
     ],
     fees: posSubFees,
@@ -222,17 +234,17 @@ async function main() {
   await waitForTx(posAdjTxHash, 'Adjudicate Positive Control Incident');
   deploymentRecord.transactions.adjudicatePositiveIncident = posAdjTxHash;
 
-  const inc2Details = await client.readContract({
+  const inc2Details = await safeReadContract({
     address: haltAddress,
     functionName: 'get_incident',
     args: [incident2Id],
   });
-  const posVaultPaused = await client.readContract({
+  const posVaultPaused = await safeReadContract({
     address: vaultAddress,
     functionName: 'is_paused',
     args: [],
   });
-  const posProtStatus = await client.readContract({
+  const posProtStatus = await safeReadContract({
     address: haltAddress,
     functionName: 'get_protection_status',
     args: [vaultAddress],
