@@ -40,6 +40,25 @@ interface ProtocolContextValue {
 
 const ProtocolContext = createContext<ProtocolContextValue | undefined>(undefined);
 
+const PROD_HALT_LAYER = "0x178D62fB059467545b0b3059C8A1A83C98E0b45E";
+const PROD_DEMO_VAULT = "0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0";
+
+const HISTORICAL_CONTRACT_ADDRESSES = new Set([
+  "0x6ec1051FD327B1D06Efc0F752CF9565C2806BB45".toLowerCase(),
+  "0x30B4aa8F89692B4128a3501Cb057cE15b0b9d0F9".toLowerCase(),
+  "0xB363DC3E1d34b4D8AbAb0B9452C4a93352C91A23".toLowerCase(),
+  "0x76a379E6e11dd6E10F13De2b7356F62a4a693d1B".toLowerCase(),
+]);
+
+function filterActiveContract(addr: string | undefined, defaultAddr: string): string {
+  if (!addr) return defaultAddr;
+  const lower = addr.trim().toLowerCase();
+  if (HISTORICAL_CONTRACT_ADDRESSES.has(lower)) {
+    return defaultAddr;
+  }
+  return addr.trim();
+}
+
 export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [rpcUrl, setRpcUrl] = useState<string>(
     process.env.NEXT_PUBLIC_GENLAYER_RPC_URL || "https://studio-next.genlayer.com/api"
@@ -48,10 +67,10 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     process.env.NEXT_PUBLIC_NETWORK_NAME || "studio_next"
   );
   const [haltLayerAddress, setHaltLayerAddress] = useState<string>(
-    process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS || "0x178D62fB059467545b0b3059C8A1A83C98E0b45E"
+    filterActiveContract(process.env.NEXT_PUBLIC_HALT_LAYER_ADDRESS, PROD_HALT_LAYER)
   );
   const [demoVaultAddress, setDemoVaultAddress] = useState<string>(
-    process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS || "0xE096057d2bB63B13Cb4200aE45A4114A283cE3E0"
+    filterActiveContract(process.env.NEXT_PUBLIC_DEMO_VAULT_ADDRESS, PROD_DEMO_VAULT)
   );
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<TransactionStatus[]>([]);
@@ -225,11 +244,13 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const setContractAddresses = (haltAddr: string, vaultAddr: string) => {
-    setHaltLayerAddress(haltAddr);
-    setDemoVaultAddress(vaultAddr);
+    const validHalt = filterActiveContract(haltAddr, PROD_HALT_LAYER);
+    const validVault = filterActiveContract(vaultAddr, PROD_DEMO_VAULT);
+    setHaltLayerAddress(validHalt);
+    setDemoVaultAddress(validVault);
     if (typeof window !== "undefined") {
-      localStorage.setItem("hl_halt_layer_addr", haltAddr);
-      localStorage.setItem("hl_demo_vault_addr", vaultAddr);
+      localStorage.setItem("hl_halt_layer_addr", validHalt);
+      localStorage.setItem("hl_demo_vault_addr", validVault);
     }
   };
 
@@ -342,16 +363,18 @@ export const ProtocolProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const storedNetwork = localStorage.getItem("hl_network_name");
       const storedRpc = localStorage.getItem("hl_rpc_url");
 
-      if (storedHalt && !HISTORICAL_ADDRESSES.has(storedHalt.toLowerCase())) {
+      if (storedHalt && !HISTORICAL_CONTRACT_ADDRESSES.has(storedHalt.toLowerCase())) {
         setHaltLayerAddress(storedHalt);
-      } else if (storedHalt && HISTORICAL_ADDRESSES.has(storedHalt.toLowerCase())) {
+      } else {
         localStorage.removeItem("hl_halt_layer_addr");
+        setHaltLayerAddress(PROD_HALT_LAYER);
       }
 
-      if (storedVault && !HISTORICAL_ADDRESSES.has(storedVault.toLowerCase())) {
+      if (storedVault && !HISTORICAL_CONTRACT_ADDRESSES.has(storedVault.toLowerCase())) {
         setDemoVaultAddress(storedVault);
-      } else if (storedVault && HISTORICAL_ADDRESSES.has(storedVault.toLowerCase())) {
+      } else {
         localStorage.removeItem("hl_demo_vault_addr");
+        setDemoVaultAddress(PROD_DEMO_VAULT);
       }
 
       if (storedNetwork) setNetworkName(storedNetwork);
